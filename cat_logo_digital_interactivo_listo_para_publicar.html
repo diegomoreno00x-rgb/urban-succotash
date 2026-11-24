@@ -1,0 +1,2543 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Catálogo Digital Interactivo</title>
+  <meta name="description" content="Catálogo digital interactivo con carrito de compras y pedidos directos por WhatsApp."/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --brand-color: #e11d48;
+      --brand-color-light: #fff1f2;
+      --brand-color-dark: #be123c;
+      --page-bg-color: #f8fafc;
+      --section-bg-color: #ffffff;
+      --section-text-color: #0f172a;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--page-bg-color);
+      color: var(--section-text-color);
+      overflow-x: hidden;
+    }
+    .bg-brand { background-color: var(--brand-color); }
+    .hover-bg-brand:hover { background-color: var(--brand-color-dark); }
+    .text-brand { color: var(--brand-color); }
+    .border-brand { border-color: var(--brand-color); }
+    .bg-brand-soft { background-color: var(--brand-color-light); }
+    .bg-section-card { background-color: var(--section-bg-color); }
+    .text-section-main { color: var(--section-text-color); }
+    #inicio {
+      width: 100%;
+    }
+    #hero-bg-image {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      max-width: none;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+    }
+    #hero-bg-image.hidden {
+      display: none;
+    }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in { animation: fadeIn 0.25s ease-out forwards; }
+    @keyframes slideInRight {
+      from { transform: translateX(100%); }
+      to { transform: translateX(0); }
+    }
+    .animate-drawer { animation: slideInRight 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-rose-200 selection:text-rose-900 pb-24">
+
+  <!-- Encabezado Fijo Superior -->
+  <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-sm">
+    <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3 min-w-0">
+        <div id="header-logo-badge" class="w-10 h-10 rounded-2xl bg-brand text-white flex items-center justify-center font-extrabold text-lg shadow-sm shrink-0">N</div>
+        <div class="truncate">
+          <h1 id="header-store-name" class="font-bold text-slate-900 text-base sm:text-lg truncate leading-tight">Nova Store</h1>
+          <p id="header-mode-label" class="text-[11px] font-medium text-slate-500 flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>Catálogo en línea
+          </p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 shrink-0">
+        <button id="quick-edit-toggle" onclick="toggleEditMode()" class="hidden px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-1.5 border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700">
+          <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+          <span id="quick-edit-text">Editar</span>
+        </button>
+        <button id="header-company-info-btn" onclick="showCompanySectionFor20s()" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-1.5 border border-slate-200 bg-white hover:bg-slate-50 text-slate-800 shadow-2xs active:scale-95">
+          <i data-lucide="building-2" class="w-3.5 h-3.5 text-brand"></i>
+          <span id="header-company-btn-text">Datos de la empresa</span>
+          <span id="company-countdown-badge" class="hidden px-1.5 py-0.5 rounded-full bg-brand-soft text-brand text-[10px] font-extrabold tabular-nums">20s</span>
+        </button>
+        <button id="header-edit-hero-btn" onclick="openCompanyModal()" class="edit-only hidden px-3 py-2 rounded-xl text-xs sm:text-sm font-bold bg-amber-500 hover:bg-amber-600 text-slate-950 transition-all flex items-center gap-1.5 shadow-sm active:scale-95">
+          <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">Editar Portada</span>
+        </button>
+        <button onclick="openDrawer()" aria-label="Menú" class="p-2.5 rounded-xl bg-slate-900 text-white hover:bg-slate-800 active:scale-95 transition-all shadow-sm flex items-center justify-center">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div id="edit-mode-banner" class="hidden bg-amber-500 text-white text-xs font-semibold py-1.5 px-4 text-center">
+      Modo Edición Activo: Puedes modificar datos, secciones, precios e imágenes.
+    </div>
+  </header>
+
+  <!-- Contenido Principal -->
+  <main class="flex-1">
+    <!-- Portada / Hero -->
+    <section id="inicio" class="relative w-full overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white h-[240px] sm:h-[340px] md:h-[420px] lg:h-[460px]">
+      <img id="hero-bg-image" src="" alt="Portada de la empresa" onload="syncHeroImageFit()" onerror="handleHeroImageError()" class="hidden w-full h-full object-cover object-center select-none"/>
+    </section>
+
+    <!-- Información de la Empresa (Oculta por defecto hasta presionar el botón por 20s) -->
+    <section id="datos-empresa" class="hidden max-w-5xl mx-auto px-4 -mt-6 relative z-10 mb-8 animate-fade-in">
+      <div class="bg-section-card rounded-3xl shadow-md border border-slate-200/80 p-5 sm:p-7">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-100">
+          <div class="flex items-center gap-3.5">
+            <div id="company-avatar" class="w-14 h-14 rounded-2xl bg-brand-soft text-brand flex items-center justify-center font-extrabold text-2xl shrink-0 border border-slate-200/60">N</div>
+            <div>
+              <span class="text-[11px] font-bold uppercase tracking-wider text-brand">Sobre Nosotros</span>
+              <h3 id="company-name" class="text-xl sm:text-2xl font-extrabold text-slate-900">Nova Store</h3>
+            </div>
+          </div>
+          <div class="flex flex-wrap items-center gap-2 self-start sm:self-center">
+            <span id="company-visibility-timer-label" class="px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-[11px] font-bold tabular-nums">Visible por 20s</span>
+            <button onclick="openCompanyModal()" class="edit-only hidden px-3.5 py-2 rounded-xl bg-slate-900 text-white hover:bg-slate-800 text-xs font-semibold flex items-center gap-1.5 transition-all">
+              <i data-lucide="settings" class="w-3.5 h-3.5"></i>
+              <span>Editar Datos de Empresa</span>
+            </button>
+          </div>
+        </div>
+        <p id="company-description" class="text-slate-600 text-sm sm:text-base leading-relaxed mt-4 mb-5">Tienda especializada en artículos de tendencia, tecnología, belleza y hogar con garantía y atención personalizada.</p>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div class="flex items-start gap-3 p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+            <div class="p-2 rounded-xl bg-emerald-100 text-emerald-700 shrink-0"><i data-lucide="phone" class="w-4 h-4"></i></div>
+            <div class="min-w-0">
+              <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">WhatsApp / Teléfono</p>
+              <p id="company-whatsapp" class="text-sm font-semibold text-slate-800 truncate">+57 300-5550199</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3 p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+            <div class="p-2 rounded-xl bg-blue-100 text-blue-700 shrink-0"><i data-lucide="map-pin" class="w-4 h-4"></i></div>
+            <div class="min-w-0">
+              <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Ubicación / Envíos</p>
+              <p id="company-location" class="text-sm font-semibold text-slate-800 truncate">Envíos a todo el país • Retiro en tienda</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3 p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+            <div class="p-2 rounded-xl bg-purple-100 text-purple-700 shrink-0"><i data-lucide="clock" class="w-4 h-4"></i></div>
+            <div class="min-w-0">
+              <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Horario y Pagos</p>
+              <p id="company-hours" class="text-sm font-semibold text-slate-800 truncate">Lun - Sáb: 9:00 AM - 7:00 PM • Pago móvil, transferencia y cuotas</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Catálogo de Productos -->
+    <section id="catalogo-productos" class="max-w-5xl mx-auto px-4 pb-16 pt-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+        <div>
+          <h3 class="text-xl sm:text-2xl font-extrabold text-section-main">Secciones del Catálogo</h3>
+          <p class="text-xs sm:text-sm opacity-70">Filtra por categoría o explora todos nuestros artículos</p>
+        </div>
+        <div class="relative w-full sm:w-64">
+          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+          <input type="text" id="search-input" oninput="handleSearch(this.value)" placeholder="Buscar producto..." class="w-full pl-9 pr-4 py-2.5 rounded-2xl bg-white border border-slate-200 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition-all"/>
+        </div>
+      </div>
+
+      <!-- Barra de Categorías -->
+      <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-3 mb-5" id="categories-bar"></div>
+
+      <!-- Panel Rápido de Edición -->
+      <div class="edit-only hidden mb-6 p-4 rounded-2xl bg-slate-900 text-white flex flex-wrap items-center justify-between gap-3 shadow-md">
+        <div class="flex items-center gap-2.5">
+          <div class="p-2 rounded-xl bg-white/10"><i data-lucide="layers" class="w-4 h-4 text-amber-400"></i></div>
+          <div>
+            <p class="text-xs sm:text-sm font-bold">Panel Rápido de Creación</p>
+            <p class="text-[11px] text-slate-300">Agrega nuevas secciones o publica productos con foto, descripción y precio</p>
+          </div>
+        </div>
+        <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+          <button onclick="copyCatalogLink()" class="flex-1 sm:flex-initial px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-all">
+            <i data-lucide="link" class="w-4 h-4"></i>
+            <span>Copiar link</span>
+          </button>
+          <button onclick="openCategoryModal()" class="flex-1 sm:flex-initial px-3.5 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-all">
+            <i data-lucide="folder-plus" class="w-4 h-4"></i>
+            <span>+ Nueva Sección</span>
+          </button>
+          <button onclick="openProductModal()" class="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-brand hover-bg-brand text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition-all">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            <span>+ Nuevo Producto</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Cuadrícula de Productos -->
+      <div id="products-grid" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4"></div>
+
+      <!-- Estado Vacío -->
+      <div id="empty-state" class="hidden text-center py-14 px-4 bg-section-card rounded-3xl border border-dashed border-slate-300">
+        <div class="w-14 h-14 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
+          <i data-lucide="package-open" class="w-7 h-7"></i>
+        </div>
+        <h4 class="text-base font-bold text-slate-800">No hay productos en esta sección</h4>
+        <p class="text-xs sm:text-sm text-slate-500 max-w-sm mx-auto mt-1 mb-4">Prueba seleccionando otra sección o inicia sesión como dueño para agregar productos nuevos.</p>
+        <button onclick="requireAuth(()=>openProductModal())" class="admin-only hidden px-4 py-2.5 rounded-xl bg-brand text-white text-xs font-semibold inline-flex items-center gap-1.5 shadow-sm">
+          <i data-lucide="plus" class="w-4 h-4"></i>
+          <span>Agregar primer producto</span>
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Botón Flotante Circular tipo Bola visible solo para la sesión iniciada del dueño -->
+  <button id="floating-add-ball" onclick="requireAuth(()=>openProductModal())" aria-label="Agregar productos" class="admin-only hidden fixed bottom-5 right-5 z-40 w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-brand hover-bg-brand text-white shadow-2xl shadow-black/35 border-4 border-white/25 flex flex-col items-center justify-center gap-1 p-2 text-center transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer">
+    <i data-lucide="plus" class="w-6 h-6 sm:w-7 sm:h-7 stroke-[2.5] shrink-0"></i>
+    <span class="text-[11px] sm:text-xs font-extrabold leading-tight tracking-tight">Agregar productos</span>
+  </button>
+
+  <!-- Botón Flotante Movible Circular tipo Bola para el Carrito -->
+  <button id="floating-cart-ball" type="button" aria-label="Carrito de compras" class="fixed bottom-5 left-5 z-40 w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-slate-900 hover:bg-slate-800 text-white shadow-2xl shadow-black/35 border-4 border-white/25 flex flex-col items-center justify-center gap-1 p-2 text-center select-none touch-none cursor-grab active:cursor-grabbing transition-transform duration-150">
+    <span id="floating-cart-badge" class="hidden absolute -top-1 -right-1 min-w-[26px] h-6.5 px-1.5 rounded-full bg-brand text-white text-xs font-extrabold flex items-center justify-center shadow-md border-2 border-white tabular-nums">0</span>
+    <i data-lucide="shopping-cart" class="w-6 h-6 sm:w-7 sm:h-7 stroke-[2.3] shrink-0 text-amber-400"></i>
+    <span class="text-[11px] sm:text-xs font-extrabold leading-tight tracking-tight">Mi Carrito</span>
+  </button>
+
+  <!-- Vista Detallada de Producto -->
+  <section id="product-detail-view" class="hidden fixed inset-0 z-50 bg-white overflow-y-auto animate-fade-in">
+    <div class="sticky top-0 z-10 bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 h-16 flex items-center justify-between">
+      <button onclick="closeProductDetail()" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-sm flex items-center gap-2 transition-all active:scale-95">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        <span>Volver al catálogo</span>
+      </button>
+      <span id="detail-category-pill" class="px-3 py-1 rounded-full bg-brand-soft text-brand text-xs font-bold">Categoría</span>
+    </div>
+    <div class="max-w-4xl mx-auto px-4 py-6 sm:py-10">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 items-start">
+        <div class="rounded-3xl overflow-hidden bg-slate-100 border border-slate-200/80 aspect-square shadow-sm">
+          <img id="detail-image" src="" alt="Producto" onerror="this.src='https://placehold.co/800x800/f1f5f9/64748b?text=Sin+Imagen'" class="w-full h-full object-cover"/>
+        </div>
+        <div class="space-y-4">
+          <p id="detail-store-label" class="text-xs font-bold uppercase tracking-wider text-slate-400">Nova Store</p>
+          <h2 id="detail-title" class="text-2xl sm:text-3xl font-extrabold text-slate-900 leading-tight">Nombre del Producto</h2>
+          <p id="detail-price" class="text-2xl sm:text-3xl font-extrabold text-brand">$0 COP</p>
+          <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
+            <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Descripción</p>
+            <p id="detail-description" class="text-sm sm:text-base text-slate-700 leading-relaxed whitespace-pre-line">Descripción detallada</p>
+          </div>
+          <div class="pt-2 space-y-2.5">
+            <button type="button" id="detail-add-cart-btn" class="w-full py-3.5 px-5 rounded-2xl bg-brand hover-bg-brand text-white font-bold text-sm sm:text-base shadow-lg flex items-center justify-center gap-2 transition-all active:scale-95">
+              <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+              <span>Agregar al carrito</span>
+            </button>
+            <a id="detail-whatsapp-btn" href="#" target="_blank" rel="noopener noreferrer" class="w-full py-3.5 px-5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm sm:text-base shadow-md flex items-center justify-center gap-2 transition-all active:scale-95">
+              <i data-lucide="message-circle" class="w-5 h-5"></i>
+              <span>Pedir directo por WhatsApp</span>
+            </a>
+            <button type="button" id="detail-edit-btn" class="hidden w-full py-3 px-4 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all">
+              <i data-lucide="edit-3" class="w-4 h-4"></i>
+              <span>Editar este producto</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Panel Lateral del Carrito de Compras -->
+  <div id="cart-backdrop" onclick="closeCartDrawer()" class="hidden fixed inset-0 z-50 bg-slate-950/50 backdrop-blur-xs"></div>
+  <aside id="cart-drawer" class="hidden fixed top-0 right-0 bottom-0 z-50 w-96 max-w-[92vw] bg-white shadow-2xl border-l border-slate-200 flex flex-col animate-drawer">
+    <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-xl bg-brand-soft text-brand flex items-center justify-center font-bold">
+          <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+        </div>
+        <div>
+          <h3 class="font-extrabold text-slate-900 text-base">Tu Carrito</h3>
+          <p id="cart-subtitle-count" class="text-[11px] text-slate-500">0 productos seleccionados</p>
+        </div>
+      </div>
+      <button onclick="closeCartDrawer()" class="p-2 rounded-xl hover:bg-slate-100 text-slate-500">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+
+    <div id="cart-items-list" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
+
+    <div id="cart-empty-state" class="hidden flex-1 flex flex-col items-center justify-center text-center p-6">
+      <div class="w-16 h-16 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mb-3">
+        <i data-lucide="shopping-bag" class="w-8 h-8"></i>
+      </div>
+      <h4 class="text-base font-extrabold text-slate-800">Tu carrito está vacío</h4>
+      <p class="text-xs text-slate-500 max-w-xs mt-1 mb-4">Entra a cualquier producto del catálogo y toca "Agregar al carrito" para armar tu compra.</p>
+      <button onclick="closeCartDrawer()" class="px-4 py-2.5 rounded-xl bg-brand text-white text-xs font-bold shadow-xs">Explorar productos</button>
+    </div>
+
+    <div id="cart-footer" class="hidden p-4 border-t border-slate-200 bg-slate-50/90 space-y-3">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Total estimado</span>
+        <span id="cart-total-amount" class="text-xl font-extrabold text-brand">$0 COP</span>
+      </div>
+      <a id="cart-whatsapp-checkout-btn" href="#" target="_blank" rel="noopener noreferrer" class="w-full py-3.5 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 transition-all active:scale-95">
+        <i data-lucide="message-circle" class="w-5 h-5"></i>
+        <span>Enviar pedido por WhatsApp</span>
+      </a>
+      <button onclick="clearCart()" class="w-full py-2 px-3 rounded-xl border border-slate-200 bg-white hover:bg-rose-50 hover:text-rose-600 text-slate-600 text-xs font-semibold flex items-center justify-center gap-1.5 transition-all">
+        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+        <span>Vaciar carrito</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Menú Lateral (Drawer) -->
+  <div id="drawer-backdrop" onclick="closeDrawer()" class="hidden fixed inset-0 z-50 bg-slate-950/50 backdrop-blur-xs"></div>
+  <aside id="side-drawer" class="hidden fixed top-0 right-0 bottom-0 z-50 w-80 max-w-[88vw] bg-white shadow-2xl border-l border-slate-200 flex flex-col animate-drawer">
+    <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-xl bg-brand text-white flex items-center justify-center font-bold text-sm">
+          <i data-lucide="sliders-horizontal" class="w-4 h-4"></i>
+        </div>
+        <div>
+          <h3 class="font-bold text-slate-900 text-base">Opciones del Catálogo</h3>
+          <p class="text-[11px] text-slate-500">Gestiona y navega tu tienda</p>
+        </div>
+      </div>
+      <button onclick="closeDrawer()" class="p-2 rounded-xl hover:bg-slate-100 text-slate-500">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+    <div class="flex-1 overflow-y-auto p-4 space-y-6">
+      <div class="p-4 rounded-2xl bg-slate-900 text-white shadow-sm">
+        <div id="drawer-logged-out-view">
+          <div class="flex items-center gap-2.5 mb-2">
+            <div class="p-2 rounded-xl bg-white/10 text-amber-400"><i data-lucide="lock" class="w-4 h-4"></i></div>
+            <div>
+              <p class="text-sm font-bold">Acceso Administrador</p>
+              <p class="text-[11px] text-slate-300">Inicia sesión para editar el catálogo</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-2 mt-3">
+            <button onclick="closeDrawer();openAuthModal('login')" class="py-2 px-3 rounded-xl bg-brand hover-bg-brand text-white text-xs font-bold transition-all">Iniciar Sesión</button>
+            <button onclick="closeDrawer();openAuthModal('register')" class="py-2 px-3 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-semibold transition-all">Crear Cuenta</button>
+          </div>
+        </div>
+        <div id="drawer-logged-in-view" class="hidden">
+          <div class="flex items-center justify-between gap-2 mb-3">
+            <div class="min-w-0">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400">Sesión Activa</span>
+              <p id="drawer-admin-name" class="text-sm font-bold truncate">Administrador</p>
+              <p id="drawer-admin-email" class="text-[11px] text-slate-400 truncate"></p>
+            </div>
+            <button onclick="logoutAdmin()" class="p-2 rounded-xl bg-white/10 hover:bg-rose-500/20 text-slate-300 hover:text-rose-300 shrink-0" title="Cerrar sesión">
+              <i data-lucide="log-out" class="w-4 h-4"></i>
+            </button>
+          </div>
+          <div class="pt-3 border-t border-white/10 flex items-center justify-between gap-2">
+            <div>
+              <p class="text-xs font-bold text-white">Modo Edición</p>
+              <p class="text-[10px] text-slate-400">Modificar productos y datos</p>
+            </div>
+            <button id="drawer-edit-switch" onclick="toggleEditMode()" class="w-12 h-7 rounded-full bg-slate-700 p-1 transition-colors flex items-center">
+              <span id="drawer-edit-knob" class="w-5 h-5 rounded-full bg-white shadow-sm transform transition-transform"></span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Apartado Exclusivo del Dueño: Compartir Catálogo -->
+      <div id="drawer-share-section" class="hidden p-4 rounded-2xl bg-emerald-50/90 border border-emerald-200/80 space-y-2.5">
+        <div class="flex items-center gap-2">
+          <div class="p-1.5 rounded-lg bg-emerald-600 text-white shrink-0">
+            <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
+          </div>
+          <div>
+            <p class="text-xs font-extrabold text-emerald-950">Compartir Catálogo</p>
+            <p class="text-[10px] text-emerald-700">Envía este enlace a tus clientes</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-1.5 bg-white border border-emerald-200 rounded-xl px-2.5 py-2">
+          <input type="text" id="catalog-share-url" readonly class="w-full text-[11px] font-medium text-slate-600 bg-transparent focus:outline-none truncate select-all"/>
+        </div>
+        <button onclick="copyCatalogLink()" class="w-full py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs transition-all">
+          <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+          <span>Copiar link de la página</span>
+        </button>
+      </div>
+
+      <div id="drawer-admin-actions" class="hidden">
+        <p class="px-2 text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">Personalizar Catálogo</p>
+        <div class="space-y-1.5">
+          <button onclick="closeDrawer();requireAuth(()=>openCompanyModal())" class="w-full px-3.5 py-3 rounded-xl hover:bg-slate-100 text-slate-800 text-sm font-medium flex items-center gap-3 text-left">
+            <i data-lucide="store" class="w-4 h-4 text-brand"></i>
+            <span>Editar Datos de la Empresa</span>
+          </button>
+          <button onclick="closeDrawer();requireAuth(()=>openCategoryModal())" class="w-full px-3.5 py-3 rounded-xl hover:bg-slate-100 text-slate-800 text-sm font-medium flex items-center gap-3 text-left">
+            <i data-lucide="folder-plus" class="w-4 h-4 text-indigo-600"></i>
+            <span>Crear Nueva Sección</span>
+          </button>
+          <button onclick="closeDrawer();requireAuth(()=>openProductModal())" class="w-full px-3.5 py-3 rounded-xl hover:bg-slate-100 text-slate-800 text-sm font-medium flex items-center gap-3 text-left">
+            <i data-lucide="plus-circle" class="w-4 h-4 text-emerald-600"></i>
+            <span>Agregar Nuevo Producto</span>
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <p class="px-2 text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">Navegación Rápida</p>
+        <div class="space-y-1" id="drawer-nav-links"></div>
+
+        <!-- Selector de Moneda por País debajo de Navegación Rápida -->
+        <div class="mt-3">
+          <button type="button" id="toggle-currency-panel-btn" onclick="toggleCurrencyCountryPanel()" aria-expanded="false" class="w-full px-3.5 py-3 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 text-xs sm:text-sm font-bold flex items-center justify-between gap-2 transition-all active:scale-98">
+            <span class="flex items-center gap-2.5 min-w-0">
+              <span class="w-7 h-7 rounded-lg bg-brand-soft text-brand flex items-center justify-center shrink-0 font-extrabold text-sm">
+                <i data-lucide="circle-dollar-sign" class="w-4 h-4"></i>
+              </span>
+              <span class="truncate">Cambiar la moneda de país</span>
+            </span>
+            <i id="currency-panel-chevron" data-lucide="chevron-down" class="w-4 h-4 text-slate-500 shrink-0 transition-transform duration-200"></i>
+          </button>
+          <div id="currency-country-panel" class="hidden mt-2 p-3 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2 animate-fade-in">
+            <label for="currency-country-select" class="block text-[11px] font-bold uppercase tracking-wider text-slate-500">Selecciona la moneda del país</label>
+            <select id="currency-country-select" onchange="changeCurrencyByCountry(this.value)" class="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-300 text-xs sm:text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition-all">
+              <option value="COP">🇨🇴 Colombia — Peso Colombiano (COP $)</option>
+              <option value="USD">🇺🇸 Estados Unidos — Dólar (USD $)</option>
+              <option value="VES">🇻🇪 Venezuela — Bolívar (VES Bs.)</option>
+              <option value="MXN">🇲🇽 México — Peso Mexicano (MXN $)</option>
+              <option value="ARS">🇦🇷 Argentina — Peso Argentino (ARS $)</option>
+              <option value="CLP">🇨🇱 Chile — Peso Chileno (CLP $)</option>
+              <option value="PEN">🇵🇪 Perú — Sol Peruano (PEN S/)</option>
+              <option value="EUR">🇪🇺 Europa — Euro (EUR €)</option>
+            </select>
+            <p id="currency-active-note" class="text-[11px] text-slate-500">Mostrando precios en Peso Colombiano (COP).</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Personalización de Colores de Marca, Página y Secciones -->
+      <div id="drawer-color-section" class="hidden px-2 space-y-4">
+        <div>
+          <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">Color Principal de Marca</p>
+          <div class="flex items-center gap-2 flex-wrap">
+            <button type="button" onclick="changeBrandColor('#e11d48','#fff1f2','#be123c')" class="w-7 h-7 rounded-full bg-rose-600 ring-2 ring-offset-2 ring-slate-200"></button>
+            <button type="button" onclick="changeBrandColor('#0f172a','#f1f5f9','#1e293b')" class="w-7 h-7 rounded-full bg-slate-900 ring-2 ring-offset-2 ring-slate-200"></button>
+            <button type="button" onclick="changeBrandColor('#059669','#ecfdf5','#047857')" class="w-7 h-7 rounded-full bg-emerald-600 ring-2 ring-offset-2 ring-slate-200"></button>
+            <button type="button" onclick="changeBrandColor('#2563eb','#eff6ff','#1d4ed8')" class="w-7 h-7 rounded-full bg-blue-600 ring-2 ring-offset-2 ring-slate-200"></button>
+            <button type="button" onclick="changeBrandColor('#7c3aed','#f5f3ff','#6d28d9')" class="w-7 h-7 rounded-full bg-violet-600 ring-2 ring-offset-2 ring-slate-200"></button>
+            <label title="Elegir cualquier color principal" class="w-7 h-7 rounded-full border-2 border-dashed border-slate-400 flex items-center justify-center cursor-pointer overflow-hidden relative bg-white">
+              <i data-lucide="pipette" class="w-3.5 h-3.5 text-slate-600"></i>
+              <input type="color" id="custom-brand-color-picker" value="#e11d48" oninput="changeCustomBrandColor(this.value)" class="opacity-0 absolute inset-0 cursor-pointer"/>
+            </label>
+          </div>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2.5">
+          <p class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Colores de Página y Secciones</p>
+          <div class="flex items-center justify-between gap-2">
+            <label for="page-bg-color-picker" class="text-xs font-semibold text-slate-700">Fondo de la página</label>
+            <input type="color" id="page-bg-color-picker" value="#f8fafc" oninput="changePageColors(this.value, null, null)" class="w-9 h-7 rounded-lg border border-slate-300 cursor-pointer bg-white"/>
+          </div>
+          <div class="flex items-center justify-between gap-2">
+            <label for="section-bg-color-picker" class="text-xs font-semibold text-slate-700">Fondo de tarjetas/secciones</label>
+            <input type="color" id="section-bg-color-picker" value="#ffffff" oninput="changePageColors(null, this.value, null)" class="w-9 h-7 rounded-lg border border-slate-300 cursor-pointer bg-white"/>
+          </div>
+          <div class="flex items-center justify-between gap-2">
+            <label for="section-text-color-picker" class="text-xs font-semibold text-slate-700">Color de texto general</label>
+            <input type="color" id="section-text-color-picker" value="#0f172a" oninput="changePageColors(null, null, this.value)" class="w-9 h-7 rounded-lg border border-slate-300 cursor-pointer bg-white"/>
+          </div>
+          <button type="button" onclick="resetThemeColors()" class="w-full py-1.5 px-2.5 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-[11px] font-semibold text-slate-600 transition-all">Restaurar colores originales</button>
+        </div>
+      </div>
+    </div>
+    <div id="drawer-reset-section" class="hidden p-4 border-t border-slate-100 bg-slate-50/70">
+      <button onclick="confirmResetCatalog()" class="w-full py-2.5 px-3 rounded-xl border border-slate-200 bg-white hover:bg-rose-50 hover:text-rose-600 text-slate-600 text-xs font-semibold flex items-center justify-center gap-2">
+        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+        <span>Restaurar catálogo de ejemplo</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Modal de Autenticación (Login / Registro) -->
+  <div id="auth-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-slate-200 p-6 animate-fade-in">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-brand-soft text-brand flex items-center justify-center">
+            <i data-lucide="shield-check" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 id="auth-modal-title" class="text-lg font-extrabold text-slate-900">Iniciar Sesión</h3>
+            <p id="auth-modal-subtitle" class="text-xs text-slate-500">Ingresa tus datos para editar el catálogo</p>
+          </div>
+        </div>
+        <button onclick="closeAuthModal()" class="p-2 rounded-xl hover:bg-slate-100 text-slate-500">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div class="grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-slate-100 mt-4">
+        <button type="button" id="tab-login-btn" onclick="switchAuthTab('login')" class="py-2 rounded-xl text-xs font-bold transition-all bg-white text-slate-900 shadow-xs">Iniciar Sesión</button>
+        <button type="button" id="tab-register-btn" onclick="switchAuthTab('register')" class="py-2 rounded-xl text-xs font-bold transition-all text-slate-500 hover:text-slate-800">Crear Cuenta</button>
+      </div>
+      <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4 mt-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Correo electrónico registrado *</label>
+          <input type="email" id="login-identifier" required placeholder="tu.correo@gmail.com" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-slate-900"/>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Contraseña *</label>
+          <input type="password" id="login-password" required placeholder="••••••••" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-slate-900"/>
+        </div>
+        <p id="auth-error-msg" class="hidden text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-200 px-3 py-2 rounded-xl"></p>
+        <button type="submit" class="w-full py-3 rounded-xl bg-brand hover-bg-brand text-white text-sm font-bold shadow-sm">Entrar y Editar Catálogo</button>
+      </form>
+      <form id="register-form" onsubmit="handleRegister(event)" class="hidden space-y-3.5 mt-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Nombre de tu Empresa *</label>
+          <input type="text" id="reg-name" required placeholder="Ej. Inversiones San José" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-slate-900"/>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Correo electrónico válido *</label>
+          <input type="email" id="reg-identifier" required placeholder="nombre@gmail.com / @hotmail.com / @empresa.com" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-slate-900"/>
+          <p class="text-[10px] text-slate-500 mt-1">Debe ser un correo real con dominio válido (ej. gmail.com, outlook.com, hotmail.com, yahoo.com, etc.).</p>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Crea una Contraseña Segura *</label>
+          <input type="password" id="reg-password" required minlength="8" oninput="updatePasswordStrengthIndicator(this.value)" placeholder="Mínimo 8 caracteres, mayúscula, minúscula y número" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-slate-900"/>
+          <div id="password-strength-box" class="mt-1.5 space-y-1">
+            <div class="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+              <div id="password-strength-bar" class="h-full w-0 bg-rose-500 transition-all duration-200"></div>
+            </div>
+            <p id="password-strength-text" class="text-[10px] font-semibold text-slate-500">Requisitos: mín. 8 caracteres, 1 mayúscula, 1 minúscula y 1 número (no se permiten claves débiles como 1234).</p>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Confirmar Contraseña *</label>
+          <input type="password" id="reg-password-confirm" required minlength="8" placeholder="Repite tu contraseña segura" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-slate-900"/>
+        </div>
+        <p id="reg-error-msg" class="hidden text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-200 px-3 py-2 rounded-xl"></p>
+        <button type="submit" class="w-full py-3 rounded-xl bg-brand hover-bg-brand text-white text-sm font-bold shadow-sm">Crear Cuenta e Iniciar Sesión</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Datos de Empresa -->
+  <div id="company-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 p-6 animate-fade-in">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <h3 class="text-lg font-extrabold text-slate-900">Datos de la Empresa y Portada</h3>
+        <button onclick="closeCompanyModal()" class="p-2 rounded-xl hover:bg-slate-100 text-slate-500">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <form id="company-form" onsubmit="saveCompanyData(event)" class="space-y-4 mt-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">Imagen de Portada (Opcional)</label>
+          <div id="hero-dropzone" ondragover="handleDropzoneDragOver(event,'hero-dropzone')" ondragleave="handleDropzoneDragLeave(event,'hero-dropzone')" ondrop="handleHeroImageDrop(event)" class="flex flex-col sm:flex-row items-center gap-4 p-3.5 rounded-2xl bg-slate-50 border-2 border-dashed border-slate-300 transition-all">
+            <img id="hero-preview-img" src="https://placehold.co/600x340/f1f5f9/64748b?text=Sin+Portada" alt="Vista previa de portada" class="w-28 h-20 rounded-xl object-cover bg-white border border-slate-200 shrink-0"/>
+            <div class="flex-1 w-full space-y-2">
+              <p class="text-[11px] font-semibold text-slate-600 flex items-center gap-1.5">
+                <i data-lucide="clipboard-paste" class="w-3.5 h-3.5 text-brand shrink-0"></i>
+                <span>Pega con <kbd class="px-1.5 py-0.5 rounded bg-white border border-slate-300 text-[10px] font-bold text-slate-800">Ctrl+V</kbd> o arrastra una imagen aquí</span>
+              </p>
+              <div class="flex items-center gap-2">
+                <label class="flex-1 px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer transition-all">
+                  <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+                  <span>Subir foto desde galería / PC</span>
+                  <input type="file" accept="image/*" onchange="handleHeroImageUpload(event)" class="hidden"/>
+                </label>
+                <button type="button" onclick="clearHeroImage()" title="Quitar imagen de portada" class="px-3 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-xs font-semibold flex items-center justify-center gap-1 transition-all shrink-0">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                  <span>Quitar</span>
+                </button>
+              </div>
+              <input type="text" id="input-hero-image" oninput="updateHeroPreviewFromUrl(this.value)" placeholder="O pega enlace (URL) de imagen de portada..." class="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs"/>
+            </div>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Nombre de la Empresa *</label>
+          <input type="text" id="input-company-name" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm"/>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Título de Portada</label>
+          <input type="text" id="input-hero-title" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm"/>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Mensaje de Bienvenida</label>
+          <textarea id="input-hero-subtitle" rows="2" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm"></textarea>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Descripción de la Empresa</label>
+          <textarea id="input-company-desc" rows="2" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm"></textarea>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">WhatsApp</label>
+            <input type="text" id="input-company-whatsapp" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm"/>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Ubicación / Envíos</label>
+            <input type="text" id="input-company-location" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm"/>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Horario y Pagos</label>
+          <input type="text" id="input-company-hours" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm"/>
+        </div>
+        <div class="pt-3 flex justify-end gap-2">
+          <button type="button" onclick="closeCompanyModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 text-sm font-semibold">Cancelar</button>
+          <button type="submit" class="px-5 py-2.5 rounded-xl bg-brand text-white text-sm font-bold">Guardar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Nueva/Editar Sección -->
+  <div id="category-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-slate-200 p-6 animate-fade-in">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <h3 id="category-modal-title" class="text-lg font-extrabold text-slate-900">Nueva Sección</h3>
+        <button onclick="closeCategoryModal()" class="p-2 rounded-xl hover:bg-slate-100 text-slate-500">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <form onsubmit="saveCategory(event)" class="space-y-4 mt-4">
+        <input type="hidden" id="edit-category-id"/>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Nombre de la Sección *</label>
+          <input type="text" id="input-category-name" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm"/>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Color de botón/etiqueta</label>
+            <div class="flex items-center gap-2">
+              <input type="color" id="input-category-color" value="#e11d48" class="w-10 h-9 rounded-xl border border-slate-300 cursor-pointer bg-white"/>
+              <span class="text-[11px] text-slate-500">Fondo sección</span>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Color de letra</label>
+            <div class="flex items-center gap-2">
+              <input type="color" id="input-category-text-color" value="#ffffff" class="w-10 h-9 rounded-xl border border-slate-300 cursor-pointer bg-white"/>
+              <span class="text-[11px] text-slate-500">Texto sección</span>
+            </div>
+          </div>
+        </div>
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="closeCategoryModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 text-sm font-semibold">Cancelar</button>
+          <button type="submit" class="px-5 py-2.5 rounded-xl bg-brand text-white text-sm font-bold">Guardar Sección</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Nuevo/Editar Producto -->
+  <div id="product-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-slate-200 p-6 animate-fade-in">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <h3 id="product-modal-title" class="text-lg font-extrabold text-slate-900">Nuevo Producto</h3>
+        <button onclick="closeProductModal()" class="p-2 rounded-xl hover:bg-slate-100 text-slate-500">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <form id="product-form" onsubmit="saveProduct(event)" class="space-y-4 mt-4">
+        <input type="hidden" id="edit-product-id"/>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">Foto del Producto</label>
+          <div id="product-dropzone" ondragover="handleDropzoneDragOver(event,'product-dropzone')" ondragleave="handleDropzoneDragLeave(event,'product-dropzone')" ondrop="handleProductImageDrop(event)" class="flex flex-col sm:flex-row items-center gap-4 p-3.5 rounded-2xl bg-slate-50 border-2 border-dashed border-slate-300 transition-all">
+            <div onclick="toggleProductImageDeleteOption(event)" title="Toca para eliminar la foto" class="relative w-20 h-20 rounded-xl overflow-hidden bg-white border border-slate-200 shrink-0 cursor-pointer group select-none">
+              <img id="product-preview-img" src="https://placehold.co/400x400/f1f5f9/64748b?text=Vista+Previa" alt="Previa" class="w-full h-full object-cover"/>
+              <div id="product-image-delete-overlay" onclick="clearProductImage(event)" class="hidden absolute inset-0 bg-slate-950/75 text-white flex flex-col items-center justify-center gap-0.5 text-[10px] font-bold p-1 text-center transition-opacity">
+                <i data-lucide="trash-2" class="w-4 h-4 text-rose-400"></i>
+                <span>Eliminar foto</span>
+              </div>
+            </div>
+            <div class="flex-1 w-full space-y-2">
+              <p class="text-[11px] font-semibold text-slate-600 flex items-center gap-1.5">
+                <i data-lucide="clipboard-paste" class="w-3.5 h-3.5 text-brand shrink-0"></i>
+                <span>Pega con <kbd class="px-1.5 py-0.5 rounded bg-white border border-slate-300 text-[10px] font-bold text-slate-800">Ctrl+V</kbd> o arrastra una imagen aquí</span>
+              </p>
+              <label class="w-full px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer">
+                <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+                <span>Subir foto desde galería / PC</span>
+                <input type="file" accept="image/*" onchange="handleImageUpload(event)" class="hidden"/>
+              </label>
+              <input type="text" id="input-product-image" oninput="updatePreviewFromUrl(this.value)" placeholder="O pega enlace (URL)..." class="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs"/>
+            </div>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Nombre *</label>
+            <input type="text" id="input-product-name" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm"/>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Precio *</label>
+            <input type="text" id="input-product-price" inputmode="decimal" pattern="[0-9.]+(,[0-9]{1,2})?" placeholder="Ej. 1.999 o 1.500.000" oninput="sanitizeNumericPriceInput(this)" onpaste="handleNumericPricePaste(event, this)" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm"/>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Sección *</label>
+          <select id="input-product-category" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm bg-white"></select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Descripción <span class="text-slate-400 font-normal">(Opcional)</span></label>
+          <textarea id="input-product-description" rows="3" placeholder="Escribe detalles del producto si deseas..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm"></textarea>
+        </div>
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="closeProductModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 text-sm font-semibold">Cancelar</button>
+          <button type="submit" class="px-5 py-2.5 rounded-xl bg-brand text-white text-sm font-bold">Guardar Producto</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Notificación Toast -->
+  <div id="toast-notification" class="hidden fixed bottom-24 left-1/2 -translate-x-1/2 z-50 px-4 py-3 rounded-2xl bg-slate-900 text-white text-xs sm:text-sm font-semibold shadow-xl flex items-center gap-2">
+    <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+    <span id="toast-message"></span>
+  </div>
+
+  <!-- Modal de Confirmación -->
+  <div id="confirm-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-200">
+      <h4 id="confirm-title" class="text-base font-extrabold text-slate-900"></h4>
+      <p id="confirm-text" class="text-sm text-slate-600 mt-1.5 mb-5"></p>
+      <div class="flex justify-end gap-2">
+        <button onclick="closeConfirmModal()" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-semibold">Cancelar</button>
+        <button id="confirm-accept-btn" class="px-4 py-2 rounded-xl bg-rose-600 text-white text-xs font-bold">Sí, continuar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const CURRENCY_CONFIGS = {
+      COP: { code: 'COP', country: 'Colombia', label: 'Peso Colombiano', symbol: '$', prefix: '$', suffix: ' COP', decimals: 0, rateFromCOP: 1 },
+      USD: { code: 'USD', country: 'Estados Unidos', label: 'Dólar Estadounidense', symbol: '$', prefix: 'US$', suffix: '', decimals: 2, rateFromCOP: 1 / 4200 },
+      VES: { code: 'VES', country: 'Venezuela', label: 'Bolívar Venezolano', symbol: 'Bs.', prefix: 'Bs.', suffix: '', decimals: 2, rateFromCOP: 46 / 4200 },
+      MXN: { code: 'MXN', country: 'México', label: 'Peso Mexicano', symbol: '$', prefix: 'MX$', suffix: '', decimals: 2, rateFromCOP: 20 / 4200 },
+      ARS: { code: 'ARS', country: 'Argentina', label: 'Peso Argentino', symbol: '$', prefix: 'AR$', suffix: '', decimals: 0, rateFromCOP: 1000 / 4200 },
+      CLP: { code: 'CLP', country: 'Chile', label: 'Peso Chileno', symbol: '$', prefix: 'CL$', suffix: '', decimals: 0, rateFromCOP: 950 / 4200 },
+      PEN: { code: 'PEN', country: 'Perú', label: 'Sol Peruano', symbol: 'S/', prefix: 'S/', suffix: '', decimals: 2, rateFromCOP: 3.75 / 4200 },
+      EUR: { code: 'EUR', country: 'Europa', label: 'Euro', symbol: '€', prefix: '€', suffix: '', decimals: 2, rateFromCOP: 0.92 / 4200 }
+    };
+
+    const DEFAULT_DATA = {
+      brandColor: '#e11d48',
+      brandColorLight: '#fff1f2',
+      brandColorDark: '#be123c',
+      pageBgColor: '#f8fafc',
+      sectionBgColor: '#ffffff',
+      sectionTextColor: '#0f172a',
+      currencyCode: 'COP',
+      company: {
+        name: 'Nova Store',
+        heroTitle: 'Descubre nuestros productos exclusivos',
+        heroSubtitle: 'Explora nuestra colección actualizada con precios claros, atención directa y envíos rápidos. Toca cualquier producto para verlo en grande.',
+        heroImage: '',
+        description: 'Tienda especializada en artículos de tendencia, belleza, termos y accesorios con atención personalizada y entregas seguras.',
+        whatsapp: '+57 300-5550199',
+        location: 'Envíos a todo el país • Retiro en tienda',
+        hours: 'Lun - Sáb: 9:00 AM - 7:00 PM • Pago móvil, transferencia y cuotas'
+      },
+      categories: [
+        { id: 'cat-belleza', name: 'Belleza y Maquillaje', color: '#e11d48', textColor: '#ffffff' },
+        { id: 'cat-hogar', name: 'Termos y Hogar', color: '#059669', textColor: '#ffffff' },
+        { id: 'cat-tech', name: 'Tecnología', color: '#2563eb', textColor: '#ffffff' }
+      ],
+      products: [
+        {
+          id: 'prod-1',
+          categoryId: 'cat-belleza',
+          name: 'Kit de Brochas Profesionales x12',
+          priceCOP: 75000,
+          price: '$75.000 COP',
+          description: 'Set completo de 12 brochas ultrasuaves con estuche organizador rígido.',
+          image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=800&q=80'
+        },
+        {
+          id: 'prod-2',
+          categoryId: 'cat-hogar',
+          name: 'Termo Térmico Acero Inoxidable 40oz',
+          priceCOP: 120000,
+          price: '$120.000 COP',
+          description: 'Mantiene tus bebidas frías hasta por 24 horas y calientes por 12 horas.',
+          image: 'https://images.unsplash.com/photo-1602143407151-7111542de6e8?auto=format&fit=crop&w=800&q=80'
+        },
+        {
+          id: 'prod-3',
+          categoryId: 'cat-tech',
+          name: 'Audífonos Inalámbricos Pro',
+          priceCOP: 189000,
+          price: '$189.000 COP',
+          description: 'Sonido envolvente de alta definición, estuche USB-C y 28h de autonomía.',
+          image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80'
+        },
+        {
+          id: 'prod-4',
+          categoryId: 'cat-belleza',
+          name: 'Paleta de Sombras Nude & Glow',
+          priceCOP: 92000,
+          price: '$92.000 COP',
+          description: '18 tonos altamente pigmentados entre acabados mate y satinados.',
+          image: 'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=800&q=80'
+        },
+        {
+          id: 'prod-5',
+          categoryId: 'cat-tech',
+          name: 'Smartwatch Deportivo Serie Ultra',
+          priceCOP: 230000,
+          price: '$230.000 COP',
+          description: 'Pantalla AMOLED, ritmo cardíaco, notificaciones de WhatsApp y llamadas.',
+          image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80'
+        },
+        {
+          id: 'prod-6',
+          categoryId: 'cat-hogar',
+          name: 'Difusor Aromático LED Minimalista',
+          priceCOP: 99000,
+          price: '$99.000 COP',
+          description: 'Humidificador ultrasónico silencioso con 7 colores de luz ambiental.',
+          image: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=800&q=80'
+        }
+      ]
+    };
+
+    const STORAGE_KEY = 'catalogo_digital_v1';
+    const CART_STORAGE_KEY = 'catalogo_digital_cart_v1';
+    const AUTH_USERS_KEY = 'catalogo_admin_users_v1';
+    const AUTH_SESSION_KEY = 'catalogo_admin_session_v1';
+    const DEFAULT_ADMIN_USER = {
+      name: 'Nova Store',
+      identifier: 'admin@novastore.com',
+      password: 'Admin1234!'
+    };
+
+    const DISPOSABLE_EMAIL_DOMAINS = new Set([
+      'example.com', 'example.org', 'example.net', 'test.com', 'prueba.com',
+      'correo.com', 'fake.com', 'temp.com', 'tempmail.com', 'mailinator.com',
+      '10minutemail.com', 'guerrillamail.com', 'yopmail.com', 'trashmail.com',
+      'sinmail.com', 'noemail.com', 'abc.com', 'xyz.com', 'asdf.com'
+    ]);
+
+    const WEAK_PASSWORDS = new Set([
+      '1234', '12345', '123456', '1234567', '12345678', '123456789', '1234567890',
+      'password', 'Password1', 'Password123', 'admin', 'Admin123', 'Admin1234',
+      'qwerty', 'Qwerty123', '00000000', '11111111', 'clave123', 'Clave123'
+    ]);
+
+    function validateStrictEmail(email) {
+      const value = String(email || '').trim().toLowerCase();
+      const emailRegex = /^[a-z0-9._%+-]{2,64}@[a-z0-9.-]+\.[a-z]{2,12}$/;
+      if (!emailRegex.test(value)) {
+        return { valid: false, message: 'Ingresa un correo electrónico válido (ej. usuario@gmail.com).' };
+      }
+      const parts = value.split('@');
+      const localPart = parts[0];
+      const domain = parts[1];
+      if (domain.includes('..') || domain.startsWith('.') || domain.endsWith('.')) {
+        return { valid: false, message: 'El dominio del correo electrónico no es válido.' };
+      }
+      const domainLabels = domain.split('.');
+      if (domainLabels.length < 2 || domainLabels.some(lbl => lbl.length < 2)) {
+        return { valid: false, message: 'El dominio del correo debe ser real (ej. gmail.com, hotmail.com, empresa.com).' };
+      }
+      if (DISPOSABLE_EMAIL_DOMAINS.has(domain)) {
+        return { valid: false, message: 'Por seguridad no se permiten correos temporales o de prueba. Usa tu correo real.' };
+      }
+      if (/^(.)\1+$/.test(localPart)) {
+        return { valid: false, message: 'Ingresa un nombre de correo real y existente.' };
+      }
+      return { valid: true, email: value };
+    }
+
+    function evaluatePasswordStrength(password) {
+      const pwd = String(password || '');
+      let score = 0;
+      const missing = [];
+
+      if (pwd.length >= 8) score += 1;
+      else missing.push('mínimo 8 caracteres');
+
+      if (/[A-ZÁÉÍÓÚÑ]/.test(pwd)) score += 1;
+      else missing.push('1 letra mayúscula');
+
+      if (/[a-záéíóúñ]/.test(pwd)) score += 1;
+      else missing.push('1 letra minúscula');
+
+      if (/[0-9]/.test(pwd)) score += 1;
+      else missing.push('1 número');
+
+      if (/[^A-Za-z0-9ÁÉÍÓÚáéíóúÑñ]/.test(pwd)) score += 1;
+
+      const isWeakPattern = WEAK_PASSWORDS.has(pwd) || /^(0123|1234|2345|3456|4567|5678|6789|abcd|qwer)/i.test(pwd) || /^(.)\1+$/.test(pwd);
+
+      if (isWeakPattern) {
+        return {
+          valid: false,
+          score: 1,
+          message: 'Contraseña demasiado fácil o predecible (como 1234). Combina mayúsculas, minúsculas y números.'
+        };
+      }
+
+      if (missing.length > 0) {
+        return {
+          valid: false,
+          score,
+          message: `Tu contraseña necesita: ${missing.join(', ')}.`
+        };
+      }
+
+      return {
+        valid: true,
+        score,
+        message: score >= 5 ? 'Seguridad excelente' : 'Contraseña segura'
+      };
+    }
+
+    function updatePasswordStrengthIndicator(pwd) {
+      const bar = document.getElementById('password-strength-bar');
+      const txt = document.getElementById('password-strength-text');
+      if (!bar || !txt) return;
+      if (!pwd) {
+        bar.style.width = '0%';
+        bar.className = 'h-full w-0 bg-rose-500 transition-all duration-200';
+        txt.textContent = 'Requisitos: mín. 8 caracteres, 1 mayúscula, 1 minúscula y 1 número (no se permiten claves débiles como 1234).';
+        txt.className = 'text-[10px] font-semibold text-slate-500';
+        return;
+      }
+      const res = evaluatePasswordStrength(pwd);
+      const pct = Math.min(100, Math.max(20, res.score * 20));
+      bar.style.width = pct + '%';
+      if (!res.valid) {
+        bar.className = 'h-full bg-rose-500 transition-all duration-200';
+        txt.textContent = res.message;
+        txt.className = 'text-[10px] font-semibold text-rose-600';
+      } else if (res.score >= 5) {
+        bar.className = 'h-full bg-emerald-600 transition-all duration-200';
+        txt.textContent = 'Seguridad muy fuerte ✓';
+        txt.className = 'text-[10px] font-bold text-emerald-700';
+      } else {
+        bar.className = 'h-full bg-amber-500 transition-all duration-200';
+        txt.textContent = 'Contraseña segura ✓ (puedes añadir un símbolo como ! o # para mayor protección)';
+        txt.className = 'text-[10px] font-bold text-amber-700';
+      }
+    }
+
+    let appState = loadState();
+    let cartItems = loadCart();
+    let currentUser = loadSession();
+    let isEditMode = Boolean(currentUser);
+    let activeCategoryId = 'all';
+    let searchQuery = '';
+    let pendingAuthAction = null;
+    let companySectionTimeout = null;
+    let companySectionInterval = null;
+    let companySectionRemaining = 0;
+    let activeDetailProductId = null;
+
+    function getActiveCurrencyConfig() {
+      const code = appState && appState.currencyCode && CURRENCY_CONFIGS[appState.currencyCode]
+        ? appState.currencyCode
+        : 'COP';
+      return CURRENCY_CONFIGS[code];
+    }
+
+    function parseRawNumberFromFormattedPrice(priceStr) {
+      if (typeof priceStr === 'number' && !Number.isNaN(priceStr)) return priceStr;
+      if (!priceStr) return 0;
+      const cleaned = String(priceStr).replace(/[^0-9.,]/g, '');
+      if (!cleaned) return 0;
+      const lastComma = cleaned.lastIndexOf(',');
+      const lastDot = cleaned.lastIndexOf('.');
+      if (lastComma > lastDot) {
+        return parseFloat(cleaned.slice(0, lastComma).replace(/[.,]/g, '') + '.' + cleaned.slice(lastComma + 1).replace(/[.,]/g, '')) || 0;
+      }
+      if (lastDot !== -1) {
+        const afterDot = cleaned.slice(lastDot + 1).replace(/[.,]/g, '');
+        if (afterDot.length > 0 && afterDot.length <= 2) {
+          return parseFloat(cleaned.slice(0, lastDot).replace(/[.,]/g, '') + '.' + afterDot) || 0;
+        }
+      }
+      return parseFloat(cleaned.replace(/[.,]/g, '')) || 0;
+    }
+
+    function formatGroupedNumber(num, decimals = 0) {
+      const safeNum = Number.isFinite(num) && num >= 0 ? num : 0;
+      const fixed = safeNum.toFixed(decimals);
+      const parts = fixed.split('.');
+      const groupedInt = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+      return decimals > 0 && parts[1] ? `${groupedInt},${parts[1]}` : groupedInt;
+    }
+
+    function formatPriceForCurrency(amountCOP, currencyCode) {
+      const cfg = CURRENCY_CONFIGS[currencyCode] || CURRENCY_CONFIGS.COP;
+      const converted = (Number(amountCOP) || 0) * cfg.rateFromCOP;
+      const formatted = formatGroupedNumber(converted, cfg.decimals);
+      return `${cfg.prefix}${formatted}${cfg.suffix}`;
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) {
+          const base = JSON.parse(JSON.stringify(DEFAULT_DATA));
+          base.products = base.products.map(p => ({
+            ...p,
+            price: formatPriceForCurrency(p.priceCOP, base.currencyCode)
+          }));
+          return base;
+        }
+        const parsed = JSON.parse(raw);
+        const merged = {
+          ...JSON.parse(JSON.stringify(DEFAULT_DATA)),
+          ...parsed,
+          company: {
+            ...DEFAULT_DATA.company,
+            ...(parsed.company || {})
+          }
+        };
+        if (!CURRENCY_CONFIGS[merged.currencyCode]) merged.currencyCode = 'COP';
+        if (!Array.isArray(merged.categories)) merged.categories = JSON.parse(JSON.stringify(DEFAULT_DATA.categories));
+        if (!Array.isArray(merged.products)) merged.products = JSON.parse(JSON.stringify(DEFAULT_DATA.products));
+        merged.products = merged.products.map(p => {
+          const baseCOP = typeof p.priceCOP === 'number' && !Number.isNaN(p.priceCOP)
+            ? p.priceCOP
+            : parseRawNumberFromFormattedPrice(p.price);
+          return {
+            ...p,
+            priceCOP: baseCOP,
+            price: formatPriceForCurrency(baseCOP, merged.currencyCode)
+          };
+        });
+        return merged;
+      } catch (e) {
+        return JSON.parse(JSON.stringify(DEFAULT_DATA));
+      }
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+      } catch (e) {}
+    }
+
+    function ensureDefaultAdminAccount() {
+      try {
+        const raw = localStorage.getItem(AUTH_USERS_KEY);
+        const list = raw ? JSON.parse(raw) : [];
+        const users = Array.isArray(list) ? list : [];
+        const exists = users.some(u => (u.identifier || '').toLowerCase() === DEFAULT_ADMIN_USER.identifier);
+        if (!exists) {
+          users.unshift({ ...DEFAULT_ADMIN_USER });
+          localStorage.setItem(AUTH_USERS_KEY, JSON.stringify(users));
+        }
+        return users;
+      } catch (e) {
+        return [{ ...DEFAULT_ADMIN_USER }];
+      }
+    }
+
+    function loadSession() {
+      ensureDefaultAdminAccount();
+      try {
+        const raw = localStorage.getItem(AUTH_SESSION_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        return parsed && parsed.identifier ? parsed : null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function saveSession(user) {
+      try {
+        if (user) {
+          localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(user));
+        } else {
+          localStorage.removeItem(AUTH_SESSION_KEY);
+        }
+      } catch (e) {}
+    }
+
+    function requireAuth(callback) {
+      if (currentUser) {
+        if (typeof callback === 'function') callback();
+        return true;
+      }
+      pendingAuthAction = typeof callback === 'function' ? callback : null;
+      openAuthModal('login');
+      return false;
+    }
+
+    function openAuthModal(tab = 'login') {
+      switchAuthTab(tab);
+      document.getElementById('auth-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeAuthModal() {
+      document.getElementById('auth-modal').classList.add('hidden');
+      document.getElementById('auth-error-msg').classList.add('hidden');
+      document.getElementById('reg-error-msg').classList.add('hidden');
+    }
+
+    function switchAuthTab(tab) {
+      const loginForm = document.getElementById('login-form');
+      const regForm = document.getElementById('register-form');
+      const tabLogin = document.getElementById('tab-login-btn');
+      const tabReg = document.getElementById('tab-register-btn');
+      const title = document.getElementById('auth-modal-title');
+      const sub = document.getElementById('auth-modal-subtitle');
+
+      document.getElementById('auth-error-msg').classList.add('hidden');
+      document.getElementById('reg-error-msg').classList.add('hidden');
+
+      if (tab === 'register') {
+        loginForm.classList.add('hidden');
+        regForm.classList.remove('hidden');
+        tabReg.className = 'py-2 rounded-xl text-xs font-bold transition-all bg-white text-slate-900 shadow-xs';
+        tabLogin.className = 'py-2 rounded-xl text-xs font-bold transition-all text-slate-500 hover:text-slate-800';
+        title.textContent = 'Crear Cuenta';
+        sub.textContent = 'Regístrate para administrar el catálogo';
+      } else {
+        regForm.classList.add('hidden');
+        loginForm.classList.remove('hidden');
+        tabLogin.className = 'py-2 rounded-xl text-xs font-bold transition-all bg-white text-slate-900 shadow-xs';
+        tabReg.className = 'py-2 rounded-xl text-xs font-bold transition-all text-slate-500 hover:text-slate-800';
+        title.textContent = 'Iniciar Sesión';
+        sub.textContent = 'Ingresa tus datos para editar el catálogo';
+      }
+    }
+
+    function handleLogin(e) {
+      e.preventDefault();
+      const identifier = document.getElementById('login-identifier').value.trim().toLowerCase();
+      const password = document.getElementById('login-password').value;
+      const errEl = document.getElementById('auth-error-msg');
+      const emailCheck = validateStrictEmail(identifier);
+
+      if (!emailCheck.valid) {
+        errEl.textContent = emailCheck.message;
+        errEl.classList.remove('hidden');
+        return;
+      }
+
+      const users = ensureDefaultAdminAccount();
+      const matched = users.find(
+        u => (u.identifier || '').toLowerCase() === emailCheck.email && u.password === password
+      );
+
+      if (!matched) {
+        errEl.textContent = 'Correo o contraseña incorrectos. Verifica tus datos o crea una cuenta.';
+        errEl.classList.remove('hidden');
+        return;
+      }
+
+      currentUser = { name: matched.name, identifier: matched.identifier };
+      isEditMode = true;
+      if (matched.name && (!appState.company.name || appState.company.name === DEFAULT_DATA.company.name)) {
+        appState.company.name = matched.name;
+        saveState();
+      }
+      saveSession(currentUser);
+      closeAuthModal();
+      renderAll();
+      showToast(`Bienvenido, ${currentUser.name}`);
+
+      if (pendingAuthAction) {
+        const fn = pendingAuthAction;
+        pendingAuthAction = null;
+        fn();
+      }
+    }
+
+    function handleRegister(e) {
+      e.preventDefault();
+      const companyName = document.getElementById('reg-name').value.trim();
+      const rawEmail = document.getElementById('reg-identifier').value.trim();
+      const password = document.getElementById('reg-password').value;
+      const confirm = document.getElementById('reg-password-confirm').value;
+      const errEl = document.getElementById('reg-error-msg');
+
+      if (companyName.length < 2) {
+        errEl.textContent = 'Escribe el nombre de tu empresa (mínimo 2 caracteres).';
+        errEl.classList.remove('hidden');
+        return;
+      }
+
+      const emailCheck = validateStrictEmail(rawEmail);
+      if (!emailCheck.valid) {
+        errEl.textContent = emailCheck.message;
+        errEl.classList.remove('hidden');
+        return;
+      }
+
+      const pwdCheck = evaluatePasswordStrength(password);
+      if (!pwdCheck.valid) {
+        errEl.textContent = pwdCheck.message;
+        errEl.classList.remove('hidden');
+        return;
+      }
+
+      if (password !== confirm) {
+        errEl.textContent = 'Las contraseñas no coinciden.';
+        errEl.classList.remove('hidden');
+        return;
+      }
+
+      const users = ensureDefaultAdminAccount();
+      if (users.some(u => (u.identifier || '').toLowerCase() === emailCheck.email)) {
+        errEl.textContent = 'Este correo electrónico ya está registrado. Inicia sesión.';
+        errEl.classList.remove('hidden');
+        return;
+      }
+
+      const newUser = { name: companyName, identifier: emailCheck.email, password };
+      users.push(newUser);
+      try {
+        localStorage.setItem(AUTH_USERS_KEY, JSON.stringify(users));
+      } catch (err) {}
+
+      appState.company = {
+        ...appState.company,
+        name: companyName
+      };
+      saveState();
+
+      currentUser = { name: companyName, identifier: emailCheck.email };
+      isEditMode = true;
+      saveSession(currentUser);
+      closeAuthModal();
+      renderAll();
+      showToast(`Empresa "${companyName}" registrada y activa`);
+
+      if (pendingAuthAction) {
+        const fn = pendingAuthAction;
+        pendingAuthAction = null;
+        fn();
+      }
+    }
+
+    function logoutAdmin() {
+      currentUser = null;
+      isEditMode = false;
+      saveSession(null);
+      closeDrawer();
+      renderAll();
+      showToast('Sesión cerrada');
+    }
+
+    function updateAuthUI() {
+      const loggedOut = document.getElementById('drawer-logged-out-view');
+      const loggedIn = document.getElementById('drawer-logged-in-view');
+      const adminActions = document.getElementById('drawer-admin-actions');
+      const shareSection = document.getElementById('drawer-share-section');
+      const colorSection = document.getElementById('drawer-color-section');
+      const resetSection = document.getElementById('drawer-reset-section');
+      const quickEditBtn = document.getElementById('quick-edit-toggle');
+      const adminOnlyEls = document.querySelectorAll('.admin-only');
+
+      if (currentUser) {
+        loggedOut.classList.add('hidden');
+        loggedIn.classList.remove('hidden');
+        adminActions.classList.remove('hidden');
+        shareSection.classList.remove('hidden');
+        colorSection.classList.remove('hidden');
+        resetSection.classList.remove('hidden');
+        quickEditBtn.classList.remove('hidden');
+        adminOnlyEls.forEach(el => el.classList.remove('hidden'));
+
+        document.getElementById('drawer-admin-name').textContent = currentUser.name || 'Administrador';
+        document.getElementById('drawer-admin-email').textContent = currentUser.identifier || '';
+        const shareInput = document.getElementById('catalog-share-url');
+        if (shareInput) shareInput.value = window.location.href;
+      } else {
+        loggedOut.classList.remove('hidden');
+        loggedIn.classList.add('hidden');
+        adminActions.classList.add('hidden');
+        shareSection.classList.add('hidden');
+        colorSection.classList.add('hidden');
+        resetSection.classList.add('hidden');
+        quickEditBtn.classList.add('hidden');
+        adminOnlyEls.forEach(el => el.classList.add('hidden'));
+      }
+    }
+
+    function copyCatalogLink() {
+      const url = window.location.href;
+      const temp = document.createElement('textarea');
+      temp.value = url;
+      temp.setAttribute('readonly', '');
+      temp.style.position = 'fixed';
+      temp.style.opacity = '0';
+      document.body.appendChild(temp);
+      temp.select();
+      try {
+        document.execCommand('copy');
+        showToast('Enlace del catálogo copiado');
+      } catch (e) {
+        showToast('No se pudo copiar el enlace');
+      }
+      document.body.removeChild(temp);
+    }
+
+    function applyBrandTheme() {
+      document.documentElement.style.setProperty('--brand-color', appState.brandColor || '#e11d48');
+      document.documentElement.style.setProperty('--brand-color-light', appState.brandColorLight || '#fff1f2');
+      document.documentElement.style.setProperty('--brand-color-dark', appState.brandColorDark || '#be123c');
+      document.documentElement.style.setProperty('--page-bg-color', appState.pageBgColor || '#f8fafc');
+      document.documentElement.style.setProperty('--section-bg-color', appState.sectionBgColor || '#ffffff');
+      document.documentElement.style.setProperty('--section-text-color', appState.sectionTextColor || '#0f172a');
+
+      const brandPicker = document.getElementById('custom-brand-color-picker');
+      const pageBgPicker = document.getElementById('page-bg-color-picker');
+      const sectionBgPicker = document.getElementById('section-bg-color-picker');
+      const sectionTextPicker = document.getElementById('section-text-color-picker');
+      if (brandPicker) brandPicker.value = appState.brandColor || '#e11d48';
+      if (pageBgPicker) pageBgPicker.value = appState.pageBgColor || '#f8fafc';
+      if (sectionBgPicker) sectionBgPicker.value = appState.sectionBgColor || '#ffffff';
+      if (sectionTextPicker) sectionTextPicker.value = appState.sectionTextColor || '#0f172a';
+    }
+
+    function hexToRgba(hex, alpha) {
+      const clean = String(hex || '').replace('#', '');
+      if (clean.length !== 6) return `rgba(225, 29, 72, ${alpha})`;
+      const r = parseInt(clean.slice(0, 2), 16);
+      const g = parseInt(clean.slice(2, 4), 16);
+      const b = parseInt(clean.slice(4, 6), 16);
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    function changeCustomBrandColor(hex) {
+      if (!currentUser) return;
+      changeBrandColor(hex, hexToRgba(hex, 0.12), hex);
+    }
+
+    function changePageColors(pageBg, sectionBg, sectionText) {
+      if (!currentUser) return;
+      if (pageBg) appState.pageBgColor = pageBg;
+      if (sectionBg) appState.sectionBgColor = sectionBg;
+      if (sectionText) appState.sectionTextColor = sectionText;
+      saveState();
+      applyBrandTheme();
+      renderProducts();
+    }
+
+    function resetThemeColors() {
+      if (!currentUser) return;
+      appState.brandColor = DEFAULT_DATA.brandColor;
+      appState.brandColorLight = DEFAULT_DATA.brandColorLight;
+      appState.brandColorDark = DEFAULT_DATA.brandColorDark;
+      appState.pageBgColor = DEFAULT_DATA.pageBgColor;
+      appState.sectionBgColor = DEFAULT_DATA.sectionBgColor;
+      appState.sectionTextColor = DEFAULT_DATA.sectionTextColor;
+      saveState();
+      applyBrandTheme();
+      renderCategories();
+      renderProducts();
+      showToast('Colores restaurados');
+    }
+
+    function changeBrandColor(primary, light, dark) {
+      if (!currentUser) return;
+      appState.brandColor = primary;
+      appState.brandColorLight = light;
+      appState.brandColorDark = dark;
+      saveState();
+      applyBrandTheme();
+      showToast('Color actualizado');
+    }
+
+    function syncHeroImageFit() {
+      const section = document.getElementById('inicio');
+      const img = document.getElementById('hero-bg-image');
+      if (!section || !img || img.classList.contains('hidden')) return;
+      img.style.width = section.clientWidth + 'px';
+      img.style.height = section.clientHeight + 'px';
+    }
+
+    function handleHeroImageError() {
+      const img = document.getElementById('hero-bg-image');
+      if (!img) return;
+      img.classList.add('hidden');
+      img.removeAttribute('src');
+    }
+
+    function renderCompanyAndHero() {
+      const c = appState.company || DEFAULT_DATA.company;
+      const initial = (c.name || 'N').trim().charAt(0).toUpperCase() || 'N';
+      document.getElementById('header-logo-badge').textContent = initial;
+      document.getElementById('header-store-name').textContent = c.name || 'Nova Store';
+      document.getElementById('company-avatar').textContent = initial;
+      document.getElementById('company-name').textContent = c.name || 'Nova Store';
+      document.getElementById('company-description').textContent = c.description || '';
+      document.getElementById('company-whatsapp').textContent = c.whatsapp || '';
+      document.getElementById('company-location').textContent = c.location || '';
+      document.getElementById('company-hours').textContent = c.hours || '';
+
+      const heroImg = document.getElementById('hero-bg-image');
+      if (heroImg) {
+        const src = (c.heroImage || '').trim();
+        if (src) {
+          heroImg.src = src;
+          heroImg.classList.remove('hidden');
+          syncHeroImageFit();
+        } else {
+          heroImg.classList.add('hidden');
+          heroImg.removeAttribute('src');
+        }
+      }
+    }
+
+    function showCompanySectionFor20s() {
+      const section = document.getElementById('datos-empresa');
+      const headerBadge = document.getElementById('company-countdown-badge');
+      const sectionLabel = document.getElementById('company-visibility-timer-label');
+      if (!section) return;
+
+      clearTimeout(companySectionTimeout);
+      clearInterval(companySectionInterval);
+
+      companySectionRemaining = 20;
+      section.classList.remove('hidden');
+      if (headerBadge) {
+        headerBadge.textContent = '20s';
+        headerBadge.classList.remove('hidden');
+      }
+      if (sectionLabel) {
+        sectionLabel.textContent = 'Visible por 20s';
+      }
+
+      section.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+      companySectionInterval = setInterval(() => {
+        companySectionRemaining -= 1;
+        if (companySectionRemaining > 0) {
+          if (headerBadge) headerBadge.textContent = `${companySectionRemaining}s`;
+          if (sectionLabel) sectionLabel.textContent = `Visible por ${companySectionRemaining}s`;
+        } else {
+          clearInterval(companySectionInterval);
+        }
+      }, 1000);
+
+      companySectionTimeout = setTimeout(() => {
+        clearInterval(companySectionInterval);
+        section.classList.add('hidden');
+        if (headerBadge) headerBadge.classList.add('hidden');
+      }, 20000);
+    }
+
+    function toggleCurrencyCountryPanel() {
+      const panel = document.getElementById('currency-country-panel');
+      const btn = document.getElementById('toggle-currency-panel-btn');
+      const chevron = document.getElementById('currency-panel-chevron');
+      if (!panel) return;
+      const isHidden = panel.classList.toggle('hidden');
+      if (btn) btn.setAttribute('aria-expanded', String(!isHidden));
+      if (chevron) chevron.classList.toggle('rotate-180', !isHidden);
+    }
+
+    function syncCurrencySelectorUI() {
+      const cfg = getActiveCurrencyConfig();
+      const sel = document.getElementById('currency-country-select');
+      const note = document.getElementById('currency-active-note');
+      if (sel) sel.value = cfg.code;
+      if (note) note.textContent = `Mostrando precios en ${cfg.label} (${cfg.code}).`;
+    }
+
+    function renderCategories() {
+      const bar = document.getElementById('categories-bar');
+      if (!bar) return;
+      bar.innerHTML = '';
+
+      const allBtn = document.createElement('button');
+      allBtn.type = 'button';
+      allBtn.className = activeCategoryId === 'all'
+        ? 'px-4 py-2 rounded-xl bg-brand text-white text-xs sm:text-sm font-bold shadow-xs shrink-0 transition-all'
+        : 'px-4 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs sm:text-sm font-semibold shrink-0 transition-all';
+      allBtn.textContent = `Todos (${appState.products.length})`;
+      allBtn.onclick = () => {
+        activeCategoryId = 'all';
+        renderCategories();
+        renderProducts();
+      };
+      bar.appendChild(allBtn);
+
+      appState.categories.forEach(c => {
+        const count = appState.products.filter(p => p.categoryId === c.id).length;
+        const wrap = document.createElement('div');
+        wrap.className = 'inline-flex items-center gap-1 shrink-0';
+
+        const catBg = c.color || appState.brandColor || '#e11d48';
+        const catText = c.textColor || '#ffffff';
+        const isActive = activeCategoryId === c.id;
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = isActive
+          ? 'px-4 py-2 rounded-xl text-xs sm:text-sm font-bold shadow-sm ring-2 ring-offset-1 ring-slate-900/20 shrink-0 transition-all'
+          : 'px-4 py-2 rounded-xl hover:opacity-90 border border-slate-200/80 text-xs sm:text-sm font-semibold shrink-0 transition-all';
+        if (isActive) {
+          btn.style.backgroundColor = catBg;
+          btn.style.color = catText;
+        } else {
+          btn.style.backgroundColor = appState.sectionBgColor || '#ffffff';
+          btn.style.color = appState.sectionTextColor || '#334155';
+          btn.style.borderLeft = `4px solid ${catBg}`;
+        }
+        btn.textContent = `${c.name} (${count})`;
+        btn.onclick = () => {
+          activeCategoryId = c.id;
+          renderCategories();
+          renderProducts();
+        };
+        wrap.appendChild(btn);
+
+        if (isEditMode) {
+          const editBtn = document.createElement('button');
+          editBtn.type = 'button';
+          editBtn.title = 'Editar sección';
+          editBtn.className = 'p-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs';
+          editBtn.innerHTML = '<i data-lucide="pencil" class="w-3 h-3"></i>';
+          editBtn.onclick = () => openCategoryModal(c.id);
+
+          const delBtn = document.createElement('button');
+          delBtn.type = 'button';
+          delBtn.title = 'Eliminar sección';
+          delBtn.className = 'p-2 rounded-xl bg-rose-100 hover:bg-rose-200 text-rose-700 text-xs';
+          delBtn.innerHTML = '<i data-lucide="trash-2" class="w-3 h-3"></i>';
+          delBtn.onclick = () => deleteCategory(c.id);
+
+          wrap.appendChild(editBtn);
+          wrap.appendChild(delBtn);
+        }
+
+        bar.appendChild(wrap);
+      });
+    }
+
+    function processImageFileToDataUrl(file, maxW, maxH, quality, callback) {
+      if (!file || !file.type.startsWith('image/')) {
+        showToast('Selecciona un archivo de imagen válido');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const img = new Image();
+        img.onload = () => {
+          let w = img.width;
+          let h = img.height;
+          if (w > maxW || h > maxH) {
+            const ratio = Math.min(maxW / w, maxH / h);
+            w = Math.round(w * ratio);
+            h = Math.round(h * ratio);
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          callback(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.onerror = () => callback(ev.target.result);
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function applyHeroImageData(dataUrl) {
+      document.getElementById('input-hero-image').value = dataUrl;
+      document.getElementById('hero-preview-img').src = dataUrl || 'https://placehold.co/600x340/f1f5f9/64748b?text=Sin+Portada';
+      showToast('Imagen de portada cargada');
+    }
+
+    function clearHeroImage() {
+      document.getElementById('input-hero-image').value = '';
+      document.getElementById('hero-preview-img').src = 'https://placehold.co/600x340/f1f5f9/64748b?text=Sin+Portada';
+      showToast('Imagen de portada quitada');
+    }
+
+    function updateHeroPreviewFromUrl(url) {
+      const trimmed = (url || '').trim();
+      document.getElementById('hero-preview-img').src = trimmed || 'https://placehold.co/600x340/f1f5f9/64748b?text=Sin+Portada';
+    }
+
+    function handleHeroImageUpload(ev) {
+      const f = ev.target.files[0];
+      if (!f) return;
+      processImageFileToDataUrl(f, 1400, 800, 0.85, applyHeroImageData);
+    }
+
+    function applyProductImageData(dataUrl) {
+      document.getElementById('input-product-image').value = dataUrl;
+      document.getElementById('product-preview-img').src = dataUrl || 'https://placehold.co/400x400/f1f5f9/64748b?text=Vista+Previa';
+      const overlay = document.getElementById('product-image-delete-overlay');
+      if (overlay) overlay.classList.add('hidden');
+      showToast('Foto del producto cargada');
+    }
+
+    function toggleProductImageDeleteOption(e) {
+      e.stopPropagation();
+      const currentVal = (document.getElementById('input-product-image').value || '').trim();
+      if (!currentVal) return;
+      const overlay = document.getElementById('product-image-delete-overlay');
+      if (overlay) overlay.classList.toggle('hidden');
+    }
+
+    function clearProductImage(e) {
+      if (e) e.stopPropagation();
+      document.getElementById('input-product-image').value = '';
+      document.getElementById('product-preview-img').src = 'https://placehold.co/400x400/f1f5f9/64748b?text=Vista+Previa';
+      const overlay = document.getElementById('product-image-delete-overlay');
+      if (overlay) overlay.classList.add('hidden');
+      showToast('Foto eliminada');
+    }
+
+    function handleDropzoneDragOver(e, zoneId) {
+      e.preventDefault();
+      const zone = document.getElementById(zoneId);
+      if (zone) zone.classList.add('border-brand', 'bg-brand-soft/40');
+    }
+
+    function handleDropzoneDragLeave(e, zoneId) {
+      e.preventDefault();
+      const zone = document.getElementById(zoneId);
+      if (zone) zone.classList.remove('border-brand', 'bg-brand-soft/40');
+    }
+
+    function handleHeroImageDrop(e) {
+      e.preventDefault();
+      handleDropzoneDragLeave(e, 'hero-dropzone');
+      const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+      if (file) {
+        processImageFileToDataUrl(file, 1400, 800, 0.85, applyHeroImageData);
+      }
+    }
+
+    function handleProductImageDrop(e) {
+      e.preventDefault();
+      handleDropzoneDragLeave(e, 'product-dropzone');
+      const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+      if (file) {
+        processImageFileToDataUrl(file, 800, 800, 0.82, applyProductImageData);
+      }
+    }
+
+    function handleGlobalPasteImage(e) {
+      const productModalOpen = !document.getElementById('product-modal').classList.contains('hidden');
+      const companyModalOpen = !document.getElementById('company-modal').classList.contains('hidden');
+      if (!productModalOpen && !companyModalOpen) return;
+
+      const items = e.clipboardData && e.clipboardData.items;
+      if (!items) return;
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf('image') !== -1) {
+          const file = items[i].getAsFile();
+          if (file) {
+            e.preventDefault();
+            if (productModalOpen) {
+              processImageFileToDataUrl(file, 800, 800, 0.82, applyProductImageData);
+            } else if (companyModalOpen) {
+              processImageFileToDataUrl(file, 1400, 800, 0.85, applyHeroImageData);
+            }
+          }
+          break;
+        }
+      }
+    }
+
+    function changeCurrencyByCountry(code) {
+      if (!CURRENCY_CONFIGS[code]) return;
+      appState.currencyCode = code;
+      appState.products = appState.products.map(p => {
+        const baseCOP = typeof p.priceCOP === 'number' && !Number.isNaN(p.priceCOP)
+          ? p.priceCOP
+          : parseRawNumberFromFormattedPrice(p.price);
+        return {
+          ...p,
+          priceCOP: baseCOP,
+          price: formatPriceForCurrency(baseCOP, code)
+        };
+      });
+      saveState();
+      syncCurrencySelectorUI();
+      renderProducts();
+      renderCart();
+      if (activeDetailProductId) {
+        const currentProd = appState.products.find(x => x.id === activeDetailProductId);
+        if (currentProd) {
+          document.getElementById('detail-price').textContent = currentProd.price;
+        }
+      }
+      const cfg = getActiveCurrencyConfig();
+      showToast(`Moneda cambiada a ${cfg.label} (${cfg.code})`);
+    }
+
+    function renderProducts() {
+      const grid = document.getElementById('products-grid');
+      const empty = document.getElementById('empty-state');
+      if (!grid || !empty) return;
+
+      const q = (searchQuery || '').trim().toLowerCase();
+      const filtered = appState.products.filter(p => {
+        const matchesCat = activeCategoryId === 'all' || p.categoryId === activeCategoryId;
+        const matchesQuery = !q ||
+          (p.name && p.name.toLowerCase().includes(q)) ||
+          (p.description && p.description.toLowerCase().includes(q));
+        return matchesCat && matchesQuery;
+      });
+
+      grid.innerHTML = '';
+      if (filtered.length === 0) {
+        empty.classList.remove('hidden');
+        return;
+      }
+      empty.classList.add('hidden');
+
+      filtered.forEach(p => {
+        const cat = appState.categories.find(c => c.id === p.categoryId);
+        const card = document.createElement('article');
+        card.className = 'group bg-section-card rounded-3xl border border-slate-200/80 overflow-hidden shadow-2xs hover:shadow-md transition-all flex flex-col justify-between';
+
+        const imgSrc = escapeHtml(p.image || 'https://placehold.co/600x600/f1f5f9/64748b?text=Producto');
+        const safeName = escapeHtml(p.name);
+        const safePrice = escapeHtml(p.price);
+        const safeDesc = escapeHtml(p.description || '');
+        const safeCat = escapeHtml(cat ? cat.name : 'General');
+        const catBadgeBg = escapeHtml((cat && cat.color) || appState.brandColor || '#e11d48');
+        const catBadgeText = escapeHtml((cat && cat.textColor) || '#ffffff');
+
+        card.innerHTML = `
+          <div onclick="openProductDetail('${p.id}')" class="cursor-pointer flex-1 flex flex-col">
+            <div class="relative aspect-square bg-slate-100 overflow-hidden">
+              <img src="${imgSrc}" alt="${safeName}" loading="lazy" onerror="this.src='https://placehold.co/600x600/f1f5f9/64748b?text=Sin+Imagen'" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"/>
+              <span style="background-color:${catBadgeBg};color:${catBadgeText};" class="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-full text-[10px] font-bold shadow-xs">${safeCat}</span>
+            </div>
+            <div class="p-3.5 sm:p-4 flex-1 flex flex-col justify-between">
+              <div>
+                <h4 class="font-bold text-section-main text-sm sm:text-base line-clamp-2 leading-snug">${safeName}</h4>
+                ${safeDesc ? `<p class="text-xs opacity-75 line-clamp-2 mt-1">${safeDesc}</p>` : ''}
+              </div>
+              <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between gap-2">
+                <span class="text-sm sm:text-base font-extrabold text-brand tracking-tight">${safePrice}</span>
+                <span class="text-[11px] font-semibold text-slate-400 group-hover:text-slate-700 flex items-center gap-0.5">
+                  Ver <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                </span>
+              </div>
+            </div>
+          </div>
+          ${isEditMode ? `
+            <div class="px-3.5 pb-3.5 pt-1 flex items-center gap-1.5">
+              <button type="button" onclick="openProductModal('${p.id}')" class="flex-1 py-2 px-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold flex items-center justify-center gap-1 transition-all">
+                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                <span>Editar</span>
+              </button>
+              <button type="button" onclick="deleteProduct('${p.id}')" class="py-2 px-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold flex items-center justify-center transition-all" title="Eliminar producto">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          ` : ''}
+        `;
+        grid.appendChild(card);
+      });
+
+      lucide.createIcons();
+    }
+
+    function renderDrawerNav() {
+      const container = document.getElementById('drawer-nav-links');
+      if (!container) return;
+      container.innerHTML = '';
+
+      const items = [
+        { label: 'Inicio / Portada', icon: 'home', action: () => { closeDrawer(); document.getElementById('inicio').scrollIntoView({ behavior: 'smooth' }); } },
+        { label: 'Todos los Productos', icon: 'grid', action: () => { activeCategoryId = 'all'; renderCategories(); renderProducts(); closeDrawer(); document.getElementById('catalogo-productos').scrollIntoView({ behavior: 'smooth' }); } },
+        { label: 'Datos de la Empresa', icon: 'building-2', action: () => { closeDrawer(); showCompanySectionFor20s(); } }
+      ];
+
+      appState.categories.forEach(cat => {
+        items.push({
+          label: cat.name,
+          icon: 'tag',
+          action: () => {
+            activeCategoryId = cat.id;
+            renderCategories();
+            renderProducts();
+            closeDrawer();
+            document.getElementById('catalogo-productos').scrollIntoView({ behavior: 'smooth' });
+          }
+        });
+      });
+
+      items.forEach(item => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'w-full px-3.5 py-2.5 rounded-xl hover:bg-slate-100 text-slate-700 text-xs sm:text-sm font-medium flex items-center gap-3 text-left transition-all';
+        btn.innerHTML = `<i data-lucide="${item.icon}" class="w-4 h-4 text-slate-400 shrink-0"></i><span class="truncate">${escapeHtml(item.label)}</span>`;
+        btn.onclick = item.action;
+        container.appendChild(btn);
+      });
+    }
+
+    function updateEditModeUI() {
+      if (!currentUser) isEditMode = false;
+
+      const editOnlyEls = document.querySelectorAll('.edit-only');
+      editOnlyEls.forEach(el => {
+        el.classList.toggle('hidden', !isEditMode);
+      });
+
+      const banner = document.getElementById('edit-mode-banner');
+      if (banner) banner.classList.toggle('hidden', !isEditMode);
+
+      const quickEditText = document.getElementById('quick-edit-text');
+      const quickEditToggle = document.getElementById('quick-edit-toggle');
+      if (quickEditText && quickEditToggle) {
+        quickEditText.textContent = isEditMode ? 'Editando' : 'Editar';
+        quickEditToggle.className = isEditMode
+          ? 'px-3 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-1.5 border border-amber-300 bg-amber-50 text-amber-800'
+          : 'px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-1.5 border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700';
+        if (!currentUser) quickEditToggle.classList.add('hidden');
+      }
+
+      const sw = document.getElementById('drawer-edit-switch');
+      const knob = document.getElementById('drawer-edit-knob');
+      if (sw && knob) {
+        sw.className = isEditMode
+          ? 'w-12 h-7 rounded-full bg-emerald-500 p-1 transition-colors flex items-center'
+          : 'w-12 h-7 rounded-full bg-slate-700 p-1 transition-colors flex items-center';
+        knob.style.transform = isEditMode ? 'translateX(20px)' : 'translateX(0px)';
+      }
+    }
+
+    function toggleEditMode() {
+      if (!currentUser) {
+        requireAuth(() => toggleEditMode());
+        return;
+      }
+      isEditMode = !isEditMode;
+      renderAll();
+      showToast(isEditMode ? 'Modo edición activado' : 'Modo vista previa activado');
+    }
+
+    function handleSearch(val) {
+      searchQuery = val || '';
+      renderProducts();
+    }
+
+    function openDrawer() {
+      updateAuthUI();
+      updateEditModeUI();
+      document.getElementById('drawer-backdrop').classList.remove('hidden');
+      document.getElementById('side-drawer').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeDrawer() {
+      document.getElementById('drawer-backdrop').classList.add('hidden');
+      document.getElementById('side-drawer').classList.add('hidden');
+    }
+
+    function openCompanyModal() {
+      if (!currentUser) {
+        requireAuth(() => openCompanyModal());
+        return;
+      }
+      const c = appState.company || DEFAULT_DATA.company;
+      document.getElementById('input-hero-image').value = c.heroImage || '';
+      document.getElementById('hero-preview-img').src = (c.heroImage || '').trim() || 'https://placehold.co/600x340/f1f5f9/64748b?text=Sin+Portada';
+      document.getElementById('input-company-name').value = c.name || '';
+      document.getElementById('input-hero-title').value = c.heroTitle || '';
+      document.getElementById('input-hero-subtitle').value = c.heroSubtitle || '';
+      document.getElementById('input-company-desc').value = c.description || '';
+      document.getElementById('input-company-whatsapp').value = c.whatsapp || '';
+      document.getElementById('input-company-location').value = c.location || '';
+      document.getElementById('input-company-hours').value = c.hours || '';
+      document.getElementById('company-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeCompanyModal() {
+      document.getElementById('company-modal').classList.add('hidden');
+    }
+
+    function saveCompanyData(e) {
+      e.preventDefault();
+      if (!currentUser) return;
+      appState.company = {
+        ...appState.company,
+        heroImage: document.getElementById('input-hero-image').value.trim(),
+        name: document.getElementById('input-company-name').value.trim() || 'Nova Store',
+        heroTitle: document.getElementById('input-hero-title').value.trim(),
+        heroSubtitle: document.getElementById('input-hero-subtitle').value.trim(),
+        description: document.getElementById('input-company-desc').value.trim(),
+        whatsapp: document.getElementById('input-company-whatsapp').value.trim(),
+        location: document.getElementById('input-company-location').value.trim(),
+        hours: document.getElementById('input-company-hours').value.trim()
+      };
+      saveState();
+      closeCompanyModal();
+      renderAll();
+      showToast('Datos de la empresa actualizados');
+    }
+
+    function openCategoryModal(categoryId = '') {
+      if (!currentUser) {
+        requireAuth(() => openCategoryModal(categoryId));
+        return;
+      }
+      const existing = categoryId ? appState.categories.find(c => c.id === categoryId) : null;
+      document.getElementById('category-modal-title').textContent = existing ? 'Editar Sección' : 'Nueva Sección';
+      document.getElementById('edit-category-id').value = existing ? existing.id : '';
+      document.getElementById('input-category-name').value = existing ? existing.name : '';
+      document.getElementById('input-category-color').value = (existing && existing.color) || appState.brandColor || '#e11d48';
+      document.getElementById('input-category-text-color').value = (existing && existing.textColor) || '#ffffff';
+      document.getElementById('category-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeCategoryModal() {
+      document.getElementById('category-modal').classList.add('hidden');
+    }
+
+    function saveCategory(e) {
+      e.preventDefault();
+      if (!currentUser) return;
+      const id = document.getElementById('edit-category-id').value.trim();
+      const name = document.getElementById('input-category-name').value.trim();
+      const color = document.getElementById('input-category-color').value || '#e11d48';
+      const textColor = document.getElementById('input-category-text-color').value || '#ffffff';
+      if (!name) return;
+
+      if (id) {
+        const cat = appState.categories.find(c => c.id === id);
+        if (cat) {
+          cat.name = name;
+          cat.color = color;
+          cat.textColor = textColor;
+        }
+        showToast('Sección actualizada');
+      } else {
+        const newId = 'cat-' + Date.now();
+        appState.categories.push({ id: newId, name, color, textColor });
+        activeCategoryId = newId;
+        showToast('Nueva sección creada');
+      }
+      saveState();
+      closeCategoryModal();
+      renderAll();
+    }
+
+    function deleteCategory(categoryId) {
+      if (!currentUser) {
+        requireAuth(() => deleteCategory(categoryId));
+        return;
+      }
+      const cat = appState.categories.find(c => c.id === categoryId);
+      if (!cat) return;
+
+      openConfirmModal(
+        'Eliminar sección',
+        `¿Seguro que deseas eliminar la sección "${cat.name}"? Los productos asociados pasarán a la primera sección disponible.`,
+        () => {
+          appState.categories = appState.categories.filter(c => c.id !== categoryId);
+          const fallbackCatId = appState.categories[0] ? appState.categories[0].id : 'cat-general';
+          if (appState.categories.length === 0) {
+            appState.categories.push({ id: fallbackCatId, name: 'General' });
+          }
+          appState.products.forEach(p => {
+            if (p.categoryId === categoryId) p.categoryId = fallbackCatId;
+          });
+          if (activeCategoryId === categoryId) activeCategoryId = 'all';
+          saveState();
+          renderAll();
+          showToast('Sección eliminada');
+        }
+      );
+    }
+
+    function populateProductCategorySelect(selectedId) {
+      const sel = document.getElementById('input-product-category');
+      if (!sel) return;
+      sel.innerHTML = '';
+      if (appState.categories.length === 0) {
+        appState.categories.push({ id: 'cat-general', name: 'General' });
+      }
+      appState.categories.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.id;
+        opt.textContent = c.name;
+        if (c.id === selectedId) opt.selected = true;
+        sel.appendChild(opt);
+      });
+    }
+
+    function sanitizeNumericPriceInput(inputEl) {
+      if (!inputEl) return;
+      const cfg = getActiveCurrencyConfig();
+      let raw = inputEl.value.replace(/[^0-9,]/g, '');
+      const commaIdx = raw.indexOf(',');
+      let intPart = commaIdx !== -1 ? raw.slice(0, commaIdx) : raw;
+      let decPart = commaIdx !== -1 ? raw.slice(commaIdx + 1).replace(/,/g, '').slice(0, 2) : '';
+
+      intPart = intPart.replace(/^0+(?=\d)/, '');
+      const groupedInt = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+      if (commaIdx !== -1 && cfg.decimals > 0) {
+        inputEl.value = `${groupedInt || '0'},${decPart}`;
+      } else {
+        inputEl.value = groupedInt;
+      }
+    }
+
+    function handleNumericPricePaste(e, inputEl) {
+      e.preventDefault();
+      const pasted = (e.clipboardData || window.clipboardData).getData('text') || '';
+      const cleaned = pasted.replace(/[^0-9.,]/g, '');
+      const parsed = parseRawNumberFromFormattedPrice(cleaned);
+      const cfg = getActiveCurrencyConfig();
+      inputEl.value = parsed > 0 ? formatGroupedNumber(parsed, cfg.decimals) : '';
+      sanitizeNumericPriceInput(inputEl);
+    }
+
+    function openProductModal(productId = '') {
+      if (!currentUser) {
+        requireAuth(() => openProductModal(productId));
+        return;
+      }
+      const existing = productId ? appState.products.find(p => p.id === productId) : null;
+      const cfg = getActiveCurrencyConfig();
+
+      document.getElementById('product-modal-title').textContent = existing ? 'Editar Producto' : 'Nuevo Producto';
+      document.getElementById('edit-product-id').value = existing ? existing.id : '';
+      document.getElementById('input-product-name').value = existing ? existing.name : '';
+
+      if (existing) {
+        const baseCOP = typeof existing.priceCOP === 'number' ? existing.priceCOP : parseRawNumberFromFormattedPrice(existing.price);
+        const convertedVal = baseCOP * cfg.rateFromCOP;
+        document.getElementById('input-product-price').value = formatGroupedNumber(convertedVal, cfg.decimals);
+      } else {
+        document.getElementById('input-product-price').value = '';
+      }
+
+      document.getElementById('input-product-description').value = existing ? (existing.description || '') : '';
+      const imgVal = existing ? (existing.image || '') : '';
+      document.getElementById('input-product-image').value = imgVal;
+      document.getElementById('product-preview-img').src = imgVal || 'https://placehold.co/400x400/f1f5f9/64748b?text=Vista+Previa';
+      const overlay = document.getElementById('product-image-delete-overlay');
+      if (overlay) overlay.classList.add('hidden');
+
+      const defaultCat = existing
+        ? existing.categoryId
+        : (activeCategoryId !== 'all' ? activeCategoryId : (appState.categories[0] && appState.categories[0].id));
+      populateProductCategorySelect(defaultCat);
+
+      document.getElementById('product-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeProductModal() {
+      document.getElementById('product-modal').classList.add('hidden');
+    }
+
+    function handleImageUpload(ev) {
+      const f = ev.target.files[0];
+      if (!f) return;
+      processImageFileToDataUrl(f, 800, 800, 0.82, applyProductImageData);
+    }
+
+    function updatePreviewFromUrl(url) {
+      const trimmed = (url || '').trim();
+      document.getElementById('product-preview-img').src = trimmed || 'https://placehold.co/400x400/f1f5f9/64748b?text=Vista+Previa';
+      const overlay = document.getElementById('product-image-delete-overlay');
+      if (overlay) overlay.classList.add('hidden');
+    }
+
+    function saveProduct(e) {
+      e.preventDefault();
+      if (!currentUser) return;
+
+      const id = document.getElementById('edit-product-id').value.trim();
+      const name = document.getElementById('input-product-name').value.trim();
+      const rawPriceInput = document.getElementById('input-product-price').value.trim();
+      const categoryId = document.getElementById('input-product-category').value;
+      const description = document.getElementById('input-product-description').value.trim();
+      const image = document.getElementById('input-product-image').value.trim();
+
+      const enteredNumeric = parseRawNumberFromFormattedPrice(rawPriceInput);
+      if (!name || Number.isNaN(enteredNumeric) || enteredNumeric <= 0) {
+        showToast('Ingresa un nombre y un precio numérico válido');
+        return;
+      }
+
+      const cfg = getActiveCurrencyConfig();
+      const priceCOP = cfg.rateFromCOP > 0 ? enteredNumeric / cfg.rateFromCOP : enteredNumeric;
+      const formattedPrice = formatPriceForCurrency(priceCOP, cfg.code);
+
+      if (id) {
+        const idx = appState.products.findIndex(p => p.id === id);
+        if (idx !== -1) {
+          appState.products[idx] = {
+            ...appState.products[idx],
+            name,
+            priceCOP,
+            price: formattedPrice,
+            categoryId,
+            description,
+            image
+          };
+        }
+        showToast('Producto actualizado');
+      } else {
+        appState.products.unshift({
+          id: 'prod-' + Date.now(),
+          name,
+          priceCOP,
+          price: formattedPrice,
+          categoryId,
+          description,
+          image
+        });
+        showToast('Producto publicado');
+      }
+
+      saveState();
+      closeProductModal();
+      renderAll();
+    }
+
+    function deleteProduct(productId) {
+      if (!currentUser) {
+        requireAuth(() => deleteProduct(productId));
+        return;
+      }
+      const p = appState.products.find(x => x.id === productId);
+      if (!p) return;
+
+      openConfirmModal(
+        'Eliminar producto',
+        `¿Seguro que deseas eliminar "${p.name}" del catálogo?`,
+        () => {
+          appState.products = appState.products.filter(x => x.id !== productId);
+          saveState();
+          renderAll();
+          showToast('Producto eliminado');
+        }
+      );
+    }
+
+    function renderAll() {
+      applyBrandTheme();
+      renderCompanyAndHero();
+      renderCategories();
+      renderProducts();
+      renderDrawerNav();
+      renderCart();
+      syncCurrencySelectorUI();
+      updateAuthUI();
+      updateEditModeUI();
+      lucide.createIcons();
+    }
+
+    function loadCart() {
+      try {
+        const raw = localStorage.getItem(CART_STORAGE_KEY);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed.filter(item => item && item.productId && item.qty > 0) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveCart() {
+      try {
+        localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
+      } catch (e) {}
+    }
+
+    function addToCart(productId) {
+      const product = appState.products.find(p => p.id === productId);
+      if (!product) return;
+      const existing = cartItems.find(item => item.productId === productId);
+      if (existing) {
+        existing.qty += 1;
+      } else {
+        cartItems.push({ productId, qty: 1 });
+      }
+      saveCart();
+      renderCart();
+      showToast(`"${product.name}" agregado al carrito`);
+    }
+
+    function updateCartItemQty(productId, delta) {
+      const idx = cartItems.findIndex(item => item.productId === productId);
+      if (idx === -1) return;
+      cartItems[idx].qty += delta;
+      if (cartItems[idx].qty <= 0) {
+        cartItems.splice(idx, 1);
+      }
+      saveCart();
+      renderCart();
+    }
+
+    function removeFromCart(productId) {
+      cartItems = cartItems.filter(item => item.productId !== productId);
+      saveCart();
+      renderCart();
+      showToast('Producto quitado del carrito');
+    }
+
+    function clearCart() {
+      cartItems = [];
+      saveCart();
+      renderCart();
+      showToast('Carrito vaciado');
+    }
+
+    function openCartDrawer() {
+      renderCart();
+      document.getElementById('cart-backdrop').classList.remove('hidden');
+      document.getElementById('cart-drawer').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeCartDrawer() {
+      document.getElementById('cart-backdrop').classList.add('hidden');
+      document.getElementById('cart-drawer').classList.add('hidden');
+    }
+
+    function renderCart() {
+      cartItems = cartItems.filter(item => appState.products.some(p => p.id === item.productId));
+      saveCart();
+
+      const totalCount = cartItems.reduce((sum, item) => sum + item.qty, 0);
+      const badge = document.getElementById('floating-cart-badge');
+      const subtitle = document.getElementById('cart-subtitle-count');
+      const listEl = document.getElementById('cart-items-list');
+      const emptyEl = document.getElementById('cart-empty-state');
+      const footerEl = document.getElementById('cart-footer');
+      const totalEl = document.getElementById('cart-total-amount');
+      const checkoutBtn = document.getElementById('cart-whatsapp-checkout-btn');
+
+      if (badge) {
+        if (totalCount > 0) {
+          badge.textContent = totalCount > 99 ? '99+' : String(totalCount);
+          badge.classList.remove('hidden');
+        } else {
+          badge.classList.add('hidden');
+        }
+      }
+
+      if (subtitle) {
+        subtitle.textContent = totalCount === 1 ? '1 producto seleccionado' : `${totalCount} productos seleccionados`;
+      }
+
+      if (!listEl || !emptyEl || !footerEl) return;
+
+      if (cartItems.length === 0) {
+        listEl.innerHTML = '';
+        listEl.classList.add('hidden');
+        footerEl.classList.add('hidden');
+        emptyEl.classList.remove('hidden');
+        return;
+      }
+
+      emptyEl.classList.add('hidden');
+      listEl.classList.remove('hidden');
+      footerEl.classList.remove('hidden');
+      listEl.innerHTML = '';
+
+      const cfg = getActiveCurrencyConfig();
+      let totalCOP = 0;
+      const waLines = [];
+
+      cartItems.forEach(item => {
+        const p = appState.products.find(prod => prod.id === item.productId);
+        if (!p) return;
+        const unitCOP = typeof p.priceCOP === 'number' ? p.priceCOP : parseRawNumberFromFormattedPrice(p.price);
+        const subtotalCOP = unitCOP * item.qty;
+        totalCOP += subtotalCOP;
+        const formattedSubtotal = formatPriceForCurrency(subtotalCOP, cfg.code);
+
+        waLines.push(`• ${item.qty}x ${p.name} (${p.price} c/u) = ${formattedSubtotal}`);
+
+        const row = document.createElement('div');
+        row.className = 'flex items-center gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-200/80';
+        row.innerHTML = `
+          <img src="${escapeHtml(p.image || 'https://placehold.co/200x200/f1f5f9/64748b?text=Producto')}" alt="${escapeHtml(p.name)}" onerror="this.src='https://placehold.co/200x200/f1f5f9/64748b?text=Sin+Imagen'" class="w-14 h-14 rounded-xl object-cover bg-white border border-slate-200 shrink-0"/>
+          <div class="flex-1 min-w-0">
+            <h5 class="text-xs sm:text-sm font-bold text-slate-900 truncate">${escapeHtml(p.name)}</h5>
+            <p class="text-xs font-extrabold text-brand mt-0.5">${escapeHtml(formattedSubtotal)}</p>
+            <div class="flex items-center gap-2 mt-2">
+              <button type="button" onclick="updateCartItemQty('${p.id}', -1)" class="w-7 h-7 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 text-slate-800 font-bold text-xs flex items-center justify-center">-</button>
+              <span class="text-xs font-extrabold text-slate-800 min-w-[20px] text-center tabular-nums">${item.qty}</span>
+              <button type="button" onclick="updateCartItemQty('${p.id}', 1)" class="w-7 h-7 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 text-slate-800 font-bold text-xs flex items-center justify-center">+</button>
+            </div>
+          </div>
+          <button type="button" onclick="removeFromCart('${p.id}')" title="Quitar del carrito" class="p-2 rounded-xl hover:bg-rose-100 text-slate-400 hover:text-rose-600 transition-colors shrink-0">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+          </button>
+        `;
+        listEl.appendChild(row);
+      });
+
+      const formattedTotal = formatPriceForCurrency(totalCOP, cfg.code);
+      if (totalEl) totalEl.textContent = formattedTotal;
+
+      if (checkoutBtn) {
+        const ph = (appState.company.whatsapp || '').replace(/\D/g, '');
+        const text = `Hola *${appState.company.name}*, me gustaría realizar el siguiente pedido:\n\n${waLines.join('\n')}\n\n*Total estimado:* ${formattedTotal}`;
+        const encoded = encodeURIComponent(text);
+        checkoutBtn.href = ph ? `https://wa.me/${ph}?text=${encoded}` : `https://wa.me/?text=${encoded}`;
+      }
+
+      lucide.createIcons();
+    }
+
+    let confirmCallback = null;
+    function openConfirmModal(title, text, onAccept) {
+      document.getElementById('confirm-title').textContent = title;
+      document.getElementById('confirm-text').textContent = text;
+      confirmCallback = onAccept;
+      document.getElementById('confirm-accept-btn').onclick = () => {
+        const fn = confirmCallback;
+        closeConfirmModal();
+        if (typeof fn === 'function') fn();
+      };
+      document.getElementById('confirm-modal').classList.remove('hidden');
+    }
+
+    function closeConfirmModal() {
+      confirmCallback = null;
+      document.getElementById('confirm-modal').classList.add('hidden');
+    }
+
+    function confirmResetCatalog() {
+      if (!currentUser) {
+        requireAuth(() => confirmResetCatalog());
+        return;
+      }
+      openConfirmModal(
+        'Restaurar catálogo de ejemplo',
+        'Se perderán tus cambios personalizados y volverán los productos iniciales de muestra. ¿Deseas continuar?',
+        () => {
+          localStorage.removeItem(STORAGE_KEY);
+          appState = loadState();
+          activeCategoryId = 'all';
+          searchQuery = '';
+          const sInput = document.getElementById('search-input');
+          if (sInput) sInput.value = '';
+          closeDrawer();
+          renderAll();
+          showToast('Catálogo restaurado');
+        }
+      );
+    }
+
+    let toastTimeout = null;
+    function showToast(message) {
+      const toast = document.getElementById('toast-notification');
+      const msgEl = document.getElementById('toast-message');
+      if (!toast || !msgEl) return;
+      msgEl.textContent = message;
+      toast.classList.remove('hidden');
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 2600);
+    }
+
+    function escapeHtml(s) {
+      return String(s || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function openProductDetail(id) {
+      const p = appState.products.find(x => x.id === id);
+      if (!p) return;
+      activeDetailProductId = p.id;
+
+      const cat = appState.categories.find(c => c.id === p.categoryId);
+      document.getElementById('detail-category-pill').textContent = cat ? cat.name : 'General';
+      document.getElementById('detail-store-label').textContent = appState.company.name;
+      document.getElementById('detail-title').textContent = p.name;
+      document.getElementById('detail-price').textContent = p.price;
+      document.getElementById('detail-description').textContent = p.description || 'Sin descripción adicional.';
+      document.getElementById('detail-image').src = p.image || 'https://placehold.co/800x800/f1f5f9/64748b?text=Sin+Imagen';
+
+      const ph = (appState.company.whatsapp || '').replace(/\D/g, '');
+      const text = encodeURIComponent(`Hola *${appState.company.name}*, me interesa el producto: *${p.name}* (${p.price}).`);
+      document.getElementById('detail-whatsapp-btn').href = ph ? `https://wa.me/${ph}?text=${text}` : `https://wa.me/?text=${text}`;
+
+      const addCartBtn = document.getElementById('detail-add-cart-btn');
+      if (addCartBtn) {
+        addCartBtn.onclick = () => addToCart(p.id);
+      }
+
+      const eb = document.getElementById('detail-edit-btn');
+      if (isEditMode && currentUser) {
+        eb.classList.remove('hidden');
+        eb.onclick = () => {
+          closeProductDetail();
+          openProductModal(p.id);
+        };
+      } else {
+        eb.classList.add('hidden');
+      }
+
+      document.getElementById('product-detail-view').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      lucide.createIcons();
+    }
+
+    function closeProductDetail() {
+      activeDetailProductId = null;
+      document.getElementById('product-detail-view').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    function initDraggableCartBall() {
+      const ball = document.getElementById('floating-cart-ball');
+      if (!ball) return;
+
+      const POS_KEY = 'catalogo_cart_ball_pos_v1';
+      let isPointerDown = false;
+      let hasMoved = false;
+      let startX = 0;
+      let startY = 0;
+      let initialLeft = 0;
+      let initialTop = 0;
+
+      function clampPosition(left, top) {
+        const rect = ball.getBoundingClientRect();
+        const w = rect.width || 96;
+        const h = rect.height || 96;
+        const maxLeft = Math.max(8, window.innerWidth - w - 8);
+        const maxTop = Math.max(8, window.innerHeight - h - 8);
+        return {
+          left: Math.min(Math.max(8, left), maxLeft),
+          top: Math.min(Math.max(8, top), maxTop)
+        };
+      }
+
+      function applyPosition(left, top) {
+        const clamped = clampPosition(left, top);
+        ball.style.left = clamped.left + 'px';
+        ball.style.top = clamped.top + 'px';
+        ball.style.right = 'auto';
+        ball.style.bottom = 'auto';
+        return clamped;
+      }
+
+      try {
+        const saved = JSON.parse(localStorage.getItem(POS_KEY) || 'null');
+        if (saved && typeof saved.left === 'number' && typeof saved.top === 'number') {
+          applyPosition(saved.left, saved.top);
+        }
+      } catch (e) {}
+
+      ball.addEventListener('pointerdown', e => {
+        if (e.button !== undefined && e.button !== 0 && e.pointerType === 'mouse') return;
+        isPointerDown = true;
+        hasMoved = false;
+        const rect = ball.getBoundingClientRect();
+        startX = e.clientX;
+        startY = e.clientY;
+        initialLeft = rect.left;
+        initialTop = rect.top;
+        ball.setPointerCapture(e.pointerId);
+      });
+
+      ball.addEventListener('pointermove', e => {
+        if (!isPointerDown) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        if (!hasMoved && Math.hypot(dx, dy) > 6) {
+          hasMoved = true;
+        }
+        if (hasMoved) {
+          applyPosition(initialLeft + dx, initialTop + dy);
+        }
+      });
+
+      function endDrag(e) {
+        if (!isPointerDown) return;
+        isPointerDown = false;
+        try {
+          ball.releasePointerCapture(e.pointerId);
+        } catch (err) {}
+
+        if (hasMoved) {
+          const rect = ball.getBoundingClientRect();
+          const saved = applyPosition(rect.left, rect.top);
+          try {
+            localStorage.setItem(POS_KEY, JSON.stringify(saved));
+          } catch (err) {}
+        } else {
+          openCartDrawer();
+        }
+      }
+
+      ball.addEventListener('pointerup', endDrag);
+      ball.addEventListener('pointercancel', endDrag);
+
+      window.addEventListener('resize', () => {
+        if (ball.style.left && ball.style.top) {
+          applyPosition(parseFloat(ball.style.left), parseFloat(ball.style.top));
+        }
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderAll();
+      initDraggableCartBall();
+    });
+
+    window.addEventListener('resize', syncHeroImageFit);
+    document.addEventListener('paste', handleGlobalPasteImage);
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        closeProductDetail();
+        closeCartDrawer();
+        closeDrawer();
+        closeProductModal();
+        closeCategoryModal();
+        closeCompanyModal();
+        closeAuthModal();
+        closeConfirmModal();
+      }
+    });
+  </script>
+</body>
+</html>
